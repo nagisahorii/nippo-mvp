@@ -1,0 +1,8 @@
+{
+  "name": "nippo-mvp",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "openai": "^4.57.0"
+  }
+}

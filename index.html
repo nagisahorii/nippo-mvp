@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>日報（音声）MVP</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:#f7f7fb; margin:0; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
+    header { font-weight: 800; font-size: 20px; padding: 12px 0; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 10px 20px rgba(0,0,0,.06); padding:14px; }
+    .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; }
+    button { flex:1; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; }
+    button.primary { background:#111827; color:#fff; border-color:#111827; }
+    ol { max-height: 180px; overflow:auto; margin:8px 0; padding-left: 20px; }
+    textarea { width:100%; min-height: 200px; resize: vertical; padding:10px; border:1px solid #e5e7eb; border-radius:10px; }
+    .hint { font-size:12px; color:#6b7280; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>日報（音声）MVP</header>
+    <div class="card">
+      <div class="row">
+        <button id="btn-rec">🎤 録音開始</button>
+        <button id="btn-clear">🧹 クリア</button>
+      </div>
+
+      <ol id="preview"></ol>
+
+      <div class="row">
+        <button id="btn-format" class="primary">整形する</button>
+      </div>
+
+      <textarea id="output" placeholder="整形結果がここに出ます"></textarea>
+
+      <div class="row">
+        <button id="btn-share">共有</button>
+        <button id="btn-copy">コピー</button>
+      </div>
+
+      <div id="status" class="hint">準備OK</div>
+    </div>
+  </div>
+
+  <script src="./voice.js" defer></script>
+</body>
+</html>

@@ -3,43 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>日報（音声）MVP</title>
+  <title>日報作成アプリ</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:#f7f7fb; margin:0; }
+    :root {
+      --bg:#f7f7fb; --fg:#111827; --muted:#6b7280; --border:#e5e7eb; --accent:#111827;
+      --ok:#059669; --err:#ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:var(--bg); color:var(--fg); margin:0; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
-    header { font-weight: 800; font-size: 20px; padding: 12px 0; }
-    .card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 10px 20px rgba(0,0,0,.06); padding:14px; }
-    .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; }
-    button { flex:1; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-weight:700; cursor:pointer; }
-    button.primary { background:#111827; color:#fff; border-color:#111827; }
-    ol { max-height: 180px; overflow:auto; margin:8px 0; padding-left: 20px; }
-    textarea { width:100%; min-height: 200px; resize: vertical; padding:10px; border:1px solid #e5e7eb; border-radius:10px; }
-    .hint { font-size:12px; color:#6b7280; }
+    header { font-weight: 800; font-size: 22px; padding: 12px 0; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 20px rgba(0,0,0,.06); padding:14px; }
+    .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; align-items:center; }
+    button { border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:800; cursor:pointer; }
+    #btn-rec { flex:1 1 100%; font-size:20px; padding:16px 18px; background:var(--accent); color:#fff; border-color:var(--accent); }
+    #btn-clear { flex:0 0 auto; font-size:12px; padding:6px 10px; color:var(--muted); }
+    #btn-share,#btn-copy { flex:1 1 0; padding:10px 12px; }
+    .hint { font-size:12px; color:var(--muted); margin-top:4px; }
+    .pill { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; margin:2px 4px 0 0; font-size:12px; color:#374151; background:#fafafa; }
+    ol { max-height: 150px; overflow:auto; margin:8px 0; padding-left: 20px; font-size:14px; }
+    textarea { width:100%; min-height: 220px; resize: vertical; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; }
+    .status { display:flex; align-items:center; gap:8px; }
+    .spinner { width:14px; height:14px; border-radius:50%; border:2px solid #e5e7eb; border-top-color:#9ca3af; animation:spin 1s linear infinite; display:none; }
+    .spinner.on { display:inline-block; }
+    .status.ok { color:var(--ok); }
+    .status.err { color:var(--err); }
+    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>日報（音声）MVP</header>
+    <header>日報作成アプリ</header>
     <div class="card">
+
+      <!-- 大ボタン + クリア(小) -->
       <div class="row">
         <button id="btn-rec">🎤 録音開始</button>
-        <button id="btn-clear">🧹 クリア</button>
+        <button id="btn-clear" title="入力を全て消す">🧹 クリア</button>
       </div>
 
-      <ol id="preview"></ol>
-
-      <div class="row">
-        <button id="btn-format" class="primary">整形する</button>
+      <!-- 話す項目一覧（シンプル・網羅） -->
+      <div class="row" aria-label="話す項目一覧">
+        <span class="pill">体験番号＋成約/非成約</span>
+        <span class="pill">年齢</span>
+        <span class="pill">仕事</span>
+        <span class="pill">運動歴</span>
+        <span class="pill">顕在ニーズ</span>
+        <span class="pill">潜在ニーズ/インサイト</span>
+        <span class="pill">方向性/テーマ</span>
+        <span class="pill">感動ポイント＋反応</span>
+        <span class="pill">入れた教育（知識共有）</span>
+        <span class="pill">断られ理由</span>
+        <span class="pill">断りへの返し</span>
+        <span class="pill">👍 good</span>
+        <span class="pill">↕️ more</span>
+        <span class="pill">自由記載</span>
       </div>
+      <div class="hint">ヒント：上の項目に沿って話すと、目標のアウトプットに近づきます。</div>
 
-      <textarea id="output" placeholder="整形結果がここに出ます"></textarea>
+      <!-- リアルタイム認識プレビュー -->
+      <ol id="preview" aria-live="polite"></ol>
 
+      <!-- 出力（停止→自動変換後に表示） -->
+      <textarea id="output" placeholder="変換結果がここに表示されます（Slackで共有/コピー）"></textarea>
+
+      <!-- 共有/コピー -->
       <div class="row">
         <button id="btn-share">共有</button>
         <button id="btn-copy">コピー</button>
       </div>
 
-      <div id="status" class="hint">準備OK</div>
+      <!-- ステータス -->
+      <div class="status hint" id="status"><span class="spinner" id="spin"></span><span id="status-text">準備OK</span></div>
     </div>
   </div>
 

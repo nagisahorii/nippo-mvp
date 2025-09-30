@@ -1,66 +1,48 @@
 // api/format.js
 import OpenAI from "openai";
 
-// 例：api/format.js
 const setCors = (res) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://9n4qfk7h8xgy.cybozu.com"); // ←置換
+  res.setHeader("Access-Control-Allow-Origin", "https://9n4qfk7h8xgy.cybozu.com"); // kintoneドメイン固定
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 };
 
-// Health check 用：GETは常に200を返す
-export default async function handler(req, res) {
-  try {
-    setCors(res);
+const SYSTEM = `あなたはピラティスインストラクター。新規顧客の体験レッスン後に作成する日報を整形します。
+出力は日本語。各見出しは【】で始め、内容は簡潔な箇条書き(1〜3行)でまとめる。
+未記載は「—」。個人名は頭文字化（例：田中太郎→Tさん）。数値は半角。
+専門用語は過剰に使わず、顧客とスタッフ双方が読んで理解できる表現に。
+`;
 
-    if (req.method === "OPTIONS") return res.status(200).end();
-    if (req.method === "GET") {
-      return res.status(200).json({ ok: true, route: "/api/format" });
-    }
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method Not Allowed" });
-    }
-
-    // --- ここからPOST処理 ---
-    // VercelのServerlessではreq.bodyが文字列のことがある → 安全にパース
-    let body = req.body;
-    if (typeof body === "string") {
-      try { body = JSON.parse(body); } catch { body = {}; }
-    }
-    const raw = (body && body.raw) ? String(body.raw) : "";
-    if (!raw.trim()) {
-      return res.status(400).json({ error: "raw is required" });
-    }
-
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "OPENAI_API_KEY is not set" });
-    }
-
-    const client = new OpenAI({ apiKey });
-
-    const SYSTEM = `あなたは店舗インストラクター向け日報整形アシスタント。
-出力は日本語。各見出しは【】で始め、内容は箇条書き1〜3行で簡潔に。
-未記載は「—」。個人名は頭文字化（例：田中太郎→Tさん）。数値は半角。`;
-
-    const TEMPLATE = `
-【本日の振り返り】
+const TEMPLATE = `
 【体験（番号＋成約/非成約）】
 【年齢】
 【仕事】
 【運動歴】
 【顕在ニーズ】
-【潜在ニーズ】
+【潜在ニーズ/インサイト】
 【自分が決めた方向性やテーマ】
 【感動ポイントと反応】
-【どんな教育を入れたか】
+【どんな教育（感動時の知識共有）を入れたか】
 【何と言われて断られたか】
 【断られた返し】
 【👍 good】
 【↕️ more】
 【自由記載欄】`;
 
-    const user = `以下の音声起こしをテンプレに沿って整形してください。
+export default async function handler(req, res) {
+  setCors(res);
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method === "GET") return res.status(200).json({ ok: true, route: "/api/format" });
+  if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
+
+  try {
+    let body = req.body;
+    if (typeof body === "string") { try { body = JSON.parse(body); } catch { body = {}; } }
+    const raw = (body?.raw || "").trim();
+    if (!raw) return res.status(400).json({ error: "raw is required" });
+
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const user = `次の音声起こしをテンプレに沿って要点を整理し、過不足を補ってください。サンプルの密度感を意識し、話者の意図を壊さない範囲で短い補助語を加えて読みやすくしてください。
 --- 音声起こし ---
 ${raw}
 --- 出力テンプレ ---
@@ -77,8 +59,7 @@ ${TEMPLATE}`;
 
     const text = completion.choices?.[0]?.message?.content || "";
     return res.status(200).json({ text });
-  } catch (err) {
-    // 何が落ちたかをレスポンスに出す（開発中のみ）
-    return res.status(500).json({ error: (err && err.message) || "internal error" });
+  } catch (e) {
+    return res.status(500).json({ error: e?.message || "internal error" });
   }
 }

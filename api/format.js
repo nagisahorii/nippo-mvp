@@ -1,8 +1,9 @@
 // api/format.js
 import OpenAI from "openai";
 
+// 例：api/format.js
 const setCors = (res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // 必要に応じてドメイン制限
+  res.setHeader("Access-Control-Allow-Origin", "https://9n4qfk7h8xgy.cybozu.com"); // ←置換
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 };

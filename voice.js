@@ -15,18 +15,17 @@
   const spin = document.getElementById("spin");
 
   let sr = null, on = false, buffer = [];
-  let endTimer = null; // ← onend が来ない時の保険
+  let endTimer = null;
 
+  // ★ 空文字を add しないように修正
   const setStatus = (msg, type = "hint") => {
-    statusEl.classList.remove("ok","err");
-    statusEl.classList.add(type === "ok" ? "ok" : type === "err" ? "err" : "");
+    statusEl.classList.remove("ok", "err");
+    if (type === "ok") statusEl.classList.add("ok");
+    else if (type === "err") statusEl.classList.add("err");
     statusText.textContent = msg;
   };
-  const setBusy = (busy) => {
-    if (busy) spin.classList.add("on"); else spin.classList.remove("on");
-  };
+  const setBusy = (busy) => { busy ? spin.classList.add("on") : spin.classList.remove("on"); };
 
-  // 変換実行を共通化
   async function convertNow() {
     const text = buffer.join("。").trim();
     console.log("[voice] convertNow raw:", text);
@@ -37,7 +36,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ raw: text })
       });
-      const data = await r.json().catch(()=> ({}));
+      const data = await r.json().catch(() => ({}));
       console.log("[voice] format status:", r.status, data);
       if (!r.ok) throw new Error(`${r.status} ${r.statusText} : ${data?.error || "API error"}`);
       out.value = data.text || "";
@@ -51,7 +50,6 @@
     }
   }
 
-  // 音声認識セットアップ
   if (SR) {
     sr = new SR();
     sr.lang = "ja-JP";
@@ -66,14 +64,13 @@
       const parts = [];
       for (let i = 0; i < e.results.length; i++) parts.push(e.results[i][0].transcript.trim());
       prv.innerHTML = ""; buffer = [];
-      parts.forEach(t => { if(!t) return; buffer.push(t); const li=document.createElement("li"); li.textContent=t; prv.appendChild(li); });
+      parts.forEach(t => { if (!t) return; buffer.push(t); const li = document.createElement("li"); li.textContent = t; prv.appendChild(li); });
       prv.scrollTop = prv.scrollHeight;
     };
 
-    // 正常終了時 → 変換
     sr.onend = async () => {
       console.log("[voice] onend");
-      clearTimeout(endTimer); // 停止直後の保険タイマーを解除
+      clearTimeout(endTimer);
       setStatus("変換中…"); setBusy(true);
       await convertNow();
     };
@@ -95,7 +92,6 @@
     setStatus("このブラウザは音声入力に対応していません（PCのChrome/Edge推奨）", "err");
   }
 
-  // ボタン動作
   recBtn.onclick = async () => {
     if (!sr) { alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
     if (!on) {
@@ -118,8 +114,7 @@
     } else {
       try { sr.stop(); } catch {}
       on = false; recBtn.textContent = "🎤 録音開始";
-
-      // ←←← ここが保険：onend が来ない場合でも 800ms 後に変換実行
+      // 保険：onendが来ない場合でも変換する
       setStatus("変換中…"); setBusy(true);
       endTimer = setTimeout(() => {
         console.log("[voice] fallback convert (onend not fired)");
@@ -128,19 +123,13 @@
     }
   };
 
-  clrBtn.onclick = () => {
-    buffer = []; prv.innerHTML = ""; out.value = "";
-    setStatus("クリアしました");
-  };
+  clrBtn.onclick = () => { buffer = []; prv.innerHTML = ""; out.value = ""; setStatus("クリアしました"); };
 
   shareBtn.onclick = async () => {
     const text = out.value.trim();
     if (!text) return alert("共有するテキストがありません");
-    if (navigator.share) {
-      try { await navigator.share({ text }); setStatus("共有しました", "ok"); } catch {}
-    } else {
-      alert("この端末は共有に対応していません。コピーをご利用ください。");
-    }
+    if (navigator.share) { try { await navigator.share({ text }); setStatus("共有しました", "ok"); } catch {} }
+    else { alert("この端末は共有に対応していません。コピーをご利用ください。"); }
   };
 
   copyBtn.onclick = async () => {

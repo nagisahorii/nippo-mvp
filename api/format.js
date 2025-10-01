@@ -1,12 +1,17 @@
-// api/format.js
+// api/format.js  （テスト用：どこからでも呼べる緩めCORS版）
+// 本番に戻すときは Access-Control-Allow-Origin を限定してください。
+
 import OpenAI from "openai";
 
-const setCors = (res) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://9n4qfk7h8xgy.cybozu.com"); // kintone
+// --- CORS（テスト中は完全開放） ---
+const setCors = (req, res) => {
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Origin", "*"); // ← TEST ONLY
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 };
 
+// --- 生成用プロンプト ---
 const SYSTEM = `あなたはピラティスインストラクター。新規顧客の体験レッスン後に作成する日報を整えます。
 出力は日本語。各見出しは【】で始め、内容は簡潔な箇条書き(1〜3行)。
 未記載は「—」。個人名は頭文字化（例：田中太郎→Tさん）。数値は半角。
@@ -44,18 +49,18 @@ const TPL_HISEIYAKU = `
 【↕️ more】
 【自由記載欄】`;
 
-// ヒューリスティック判定
+// --- 先にルールベースで判定（高速・明示語優先）---
 function heuristicOutcome(s) {
-  const x = s.replace(/\s+/g, "");
-  const ng = /(非成約|未成約|見送り|保留|検討したい|家族に相談|他社も検討|また連絡|今日は決められない)/;
+  const x = (s || "").replace(/\s+/g, "");
+  const ng = /(非成約|未成約|見送り|保留|検討したい|家族に相談|他社も検討|また連絡|今日は決められない|今日は決めない|持ち帰り)/;
   if (ng.test(x)) return "非成約";
-  const ok = /(成約|入会|申込|契約|月\d+|継続|購入|登録)/;
+  const ok = /(成約|入会|申込|契約|継続|購入|登録|次回予約|月\d+|コース決定)/;
   if (ok.test(x)) return "成約";
   return null;
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  setCors(req, res);
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method === "GET") return res.status(200).json({ ok: true, route: "/api/format" });
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
@@ -68,8 +73,10 @@ export default async function handler(req, res) {
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    let outcome = heuristicOutcome(raw);
+    // 1) まずヒューリスティック（明示語）で判定
+    let outcome = heuristicOutcome(raw); // "成約" | "非成約" | null
 
+    // 2) 明示語が無い/曖昧なら LLM で文脈判定
     if (!outcome) {
       const judge = await client.chat.completions.create({
         model: "gpt-4.1-mini",
@@ -77,7 +84,8 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "system",
-            content: `あなたは音声起こしから結果を判定するアシスタントです。
+            content:
+`あなたは音声起こしから結果を判定するアシスタントです。
 出力は「成約」か「非成約」のどちらか1語のみ。説明や句読点を付けないでください。
 判断基準:
 - 成約: 入会/契約/申込/継続/購入/月プラン決定/次回予約確定 などの意思が明確
@@ -87,11 +95,14 @@ export default async function handler(req, res) {
           { role: "user", content: raw }
         ]
       });
-      outcome = (judge.choices?.[0]?.message?.content || "").includes("成約") ? "成約" : "非成約";
+      const j = (judge.choices?.[0]?.message?.content || "").trim();
+      outcome = j.includes("成約") ? "成約" : "非成約";
     }
 
+    // 3) テンプレ選択
     const TEMPLATE = outcome === "成約" ? TPL_SEIYAKU : TPL_HISEIYAKU;
 
+    // 4) 生成
     const user = `以下の音声起こしを、選択されたテンプレート（${outcome}）に沿って整えてください。
 不足しているが文脈から補える補助語は最小限で補って可。冗長表現は避けて簡潔に。
 --- 音声起こし ---

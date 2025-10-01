@@ -1,6 +1,6 @@
 // voice.js
 (() => {
-  const API_BASE = "https://nippo-mvp-mlye.vercel.app"; // ← あなたのVercel URL
+  const API_BASE = "https://nippo-mvp-mlye.vercel.app";
   const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -15,6 +15,7 @@
   const spin = document.getElementById("spin");
 
   let sr = null, on = false, buffer = [];
+  let endTimer = null; // ← onend が来ない時の保険
 
   const setStatus = (msg, type = "hint") => {
     statusEl.classList.remove("ok","err");
@@ -22,68 +23,64 @@
     statusText.textContent = msg;
   };
   const setBusy = (busy) => {
-    if (busy) { spin.classList.add("on"); }
-    else { spin.classList.remove("on"); }
+    if (busy) spin.classList.add("on"); else spin.classList.remove("on");
   };
 
-  // 音声認識セットアップ（PC Chrome/Edge）
+  // 変換実行を共通化
+  async function convertNow() {
+    const text = buffer.join("。").trim();
+    console.log("[voice] convertNow raw:", text);
+    if (!text) { setBusy(false); setStatus("テキストがありません", "err"); return; }
+    try {
+      const r = await fetch(API_BASE + API_PATH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ raw: text })
+      });
+      const data = await r.json().catch(()=> ({}));
+      console.log("[voice] format status:", r.status, data);
+      if (!r.ok) throw new Error(`${r.status} ${r.statusText} : ${data?.error || "API error"}`);
+      out.value = data.text || "";
+      setStatus(`変換完了（検出：${data.outcome || "判定不可"}）`, "ok");
+    } catch (e) {
+      console.error(e);
+      setStatus("変換エラー： " + e.message, "err");
+      alert("変換に失敗しました。通信状態やAPI設定を確認してください。");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // 音声認識セットアップ
   if (SR) {
     sr = new SR();
     sr.lang = "ja-JP";
     sr.interimResults = true;
     sr.continuous = true;
 
-    sr.onstart = () => setStatus("録音中… 話し終えたら停止を押してください");
-    sr.onaudiostart = () => console.log("audio start");
-    sr.onaudioend = () => console.log("audio end");
-    sr.onend = async () => {
-      setStatus("変換中…");
-      setBusy(true);
-      const text = buffer.join("。").trim();
-      if (!text) {
-        setBusy(false);
-        setStatus("テキストがありません", "err");
-        return;
-      }
-      try {
-        const r = await fetch(API_BASE + API_PATH, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ raw: text })
-        });
-        const data = await r.json();
-        if (!r.ok) throw new Error(data?.error || "変換に失敗しました");
-        out.value = data.text || "";
-        setStatus("変換完了", "ok");
-      } catch (e) {
-        console.error(e);
-        setStatus("変換エラー： " + e.message, "err");
-        alert("変換に失敗しました。通信状態やAPI設定を確認してください。");
-      } finally {
-        setBusy(false);
-      }
-    };
+    sr.onstart = () => { setStatus("録音中… 話し終えたら停止を押してください"); console.log("[voice] onstart"); };
+    sr.onaudiostart = () => console.log("[voice] audio start");
+    sr.onaudioend = () => console.log("[voice] audio end");
 
     sr.onresult = (e) => {
-      // リアルタイムプレビュー（常に全量を描画）
       const parts = [];
-      for (let i = 0; i < e.results.length; i++) {
-        parts.push(e.results[i][0].transcript.trim());
-      }
-      prv.innerHTML = "";
-      buffer = [];
-      parts.forEach(t => {
-        if (!t) return;
-        buffer.push(t);
-        const li = document.createElement("li");
-        li.textContent = t;
-        prv.appendChild(li);
-      });
+      for (let i = 0; i < e.results.length; i++) parts.push(e.results[i][0].transcript.trim());
+      prv.innerHTML = ""; buffer = [];
+      parts.forEach(t => { if(!t) return; buffer.push(t); const li=document.createElement("li"); li.textContent=t; prv.appendChild(li); });
       prv.scrollTop = prv.scrollHeight;
+    };
+
+    // 正常終了時 → 変換
+    sr.onend = async () => {
+      console.log("[voice] onend");
+      clearTimeout(endTimer); // 停止直後の保険タイマーを解除
+      setStatus("変換中…"); setBusy(true);
+      await convertNow();
     };
 
     sr.onnomatch = () => setStatus("音声を認識できませんでした。もう一度、はっきり話してください。", "err");
     sr.onerror = (e) => {
+      console.warn("[voice] onerror:", e);
       const map = {
         "no-speech": "音声が検出できません。マイクの入力レベル・距離を調整してください。",
         "audio-capture": "マイクが見つかりません。デバイス設定を確認してください。",
@@ -102,7 +99,6 @@
   recBtn.onclick = async () => {
     if (!sr) { alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
     if (!on) {
-      // 事前に権限を要求（ダイアログを確実に出す）
       try {
         if (navigator.mediaDevices?.getUserMedia) {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -113,12 +109,22 @@
         return;
       }
       buffer = []; prv.innerHTML = "";
-      try { sr.start(); on = true; recBtn.textContent = "■ 停止"; setStatus("録音中…"); }
-      catch (e) { setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。", "err"); }
+      try {
+        sr.start(); on = true; recBtn.textContent = "■ 停止"; setStatus("録音中…");
+      } catch (e) {
+        console.warn("[voice] sr.start error:", e);
+        setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。", "err");
+      }
     } else {
       try { sr.stop(); } catch {}
       on = false; recBtn.textContent = "🎤 録音開始";
-      // onendで自動変換に進む
+
+      // ←←← ここが保険：onend が来ない場合でも 800ms 後に変換実行
+      setStatus("変換中…"); setBusy(true);
+      endTimer = setTimeout(() => {
+        console.log("[voice] fallback convert (onend not fired)");
+        convertNow();
+      }, 800);
     }
   };
 
@@ -131,8 +137,7 @@
     const text = out.value.trim();
     if (!text) return alert("共有するテキストがありません");
     if (navigator.share) {
-      try { await navigator.share({ text }); setStatus("共有しました", "ok"); }
-      catch {}
+      try { await navigator.share({ text }); setStatus("共有しました", "ok"); } catch {}
     } else {
       alert("この端末は共有に対応していません。コピーをご利用ください。");
     }

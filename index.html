@@ -17,18 +17,29 @@
     .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; align-items:center; }
     button { border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:800; cursor:pointer; }
     #btn-rec { flex:1 1 100%; font-size:20px; padding:16px 18px; background:var(--accent); color:#fff; border-color:var(--accent); }
-    #btn-clear { flex:0 0 auto; font-size:12px; padding:6px 10px; color:var(--muted); }
+    #btn-clear { flex:0 0 auto; font-size:12px; padding:6px 10px; color:#374151; }
     #btn-share,#btn-copy { flex:1 1 0; padding:10px 12px; }
+    button[disabled] { opacity:.5; cursor:not-allowed; }
     .hint { font-size:12px; color:var(--muted); margin-top:4px; }
-    .pill { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; margin:2px 4px 0 0; font-size:12px; color:#374151; background:#fafafa; }
+
+    /* 話す項目（カテゴリ分け） */
+    .sections { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+    .section { border:1px dashed var(--border); border-radius:10px; padding:8px; background:#fafafa; }
+    .section-title { font-size:12px; font-weight:800; color:#374151; margin-bottom:6px; }
+    .pill { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; margin:4px 6px 0 0; font-size:12px; color:#374151; background:#fff; }
+
     ol { max-height: 150px; overflow:auto; margin:8px 0; padding-left: 20px; font-size:14px; }
     textarea { width:100%; min-height: 220px; resize: vertical; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; }
+
     .status { display:flex; align-items:center; gap:8px; }
     .spinner { width:14px; height:14px; border-radius:50%; border:2px solid #e5e7eb; border-top-color:#9ca3af; animation:spin 1s linear infinite; display:none; }
     .spinner.on { display:inline-block; }
     .status.ok { color:var(--ok); }
     .status.err { color:var(--err); }
     @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* 未来拡張用（成約判定で薄くする時に使う） */
+    .disabled { opacity:.4; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -42,44 +53,55 @@
         <button id="btn-clear" title="入力を全て消す">🧹 クリア</button>
       </div>
 
-      <!-- 話す項目一覧（シンプル・網羅） -->
-      <div class="row" aria-label="話す項目一覧">
-        <span class="pill">体験番号＋成約/非成約</span>
-        <span class="pill">年齢</span>
-        <span class="pill">仕事</span>
-        <span class="pill">運動歴</span>
-        <span class="pill">顕在ニーズ</span>
-        <span class="pill">潜在ニーズ/インサイト</span>
-        <span class="pill">方向性/テーマ</span>
-        <span class="pill">感動ポイント＋反応</span>
-        <span class="pill">入れた教育（知識共有）</span>
-        <span class="pill">断られ理由</span>
-        <span class="pill">断りへの返し</span>
-        <span class="pill">👍 good</span>
-        <span class="pill">↕️ more</span>
-        <span class="pill">自由記載</span>
+      <!-- 状態表示（ボタン直下で常時見える） -->
+      <div class="status hint" id="status" aria-live="polite">
+        <span class="spinner" id="spin"></span>
+        <span id="status-text">準備OK。録音を開始してください。</span>
       </div>
-      <div class="hint">ヒント：上の項目に沿って話すと、目標のアウトプットに近づきます。</div>
+
+      <!-- 話す項目：カテゴリ分けで視認性UP -->
+      <div class="sections" aria-label="話す項目一覧">
+        <div class="section">
+          <div class="section-title">基本情報</div>
+          <span class="pill">体験番号＋成約/非成約</span>
+          <span class="pill">年齢</span>
+          <span class="pill">仕事</span>
+          <span class="pill">運動歴</span>
+        </div>
+        <div class="section">
+          <div class="section-title">ニーズ・反応</div>
+          <span class="pill">顕在ニーズ</span>
+          <span class="pill">潜在ニーズ/インサイト</span>
+          <span class="pill">方向性/テーマ</span>
+          <span class="pill">感動ポイント＋反応</span>
+          <span class="pill">入れた教育（知識共有）</span>
+        </div>
+        <div class="section">
+          <div class="section-title">追加要素</div>
+          <span class="pill" data-type="hiseiyaku">断られ理由</span>
+          <span class="pill" data-type="hiseiyaku">断りへの返し</span>
+          <span class="pill">👍 good</span>
+          <span class="pill">↕️ more</span>
+          <span class="pill">自由記載</span>
+        </div>
+      </div>
+      <div class="hint">上の項目に沿って話してください（例：基本情報→ニーズ・反応→追加要素）。</div>
 
       <!-- リアルタイム認識プレビュー -->
       <ol id="preview" aria-live="polite"></ol>
 
       <!-- 出力（停止→自動変換後に表示） -->
-      <textarea id="output" placeholder="変換結果がここに表示されます（Slackで共有/コピー）"></textarea>
+      <textarea id="output" placeholder="変換結果がここに表示されます（Slackで共有）"></textarea>
 
       <!-- 共有/コピー -->
       <div class="row">
         <button id="btn-share">共有</button>
         <button id="btn-copy">コピー</button>
       </div>
-
-      <!-- ステータス -->
-      <div class="status hint" id="status"><span class="spinner" id="spin"></span><span id="status-text">準備OK</span></div>
     </div>
   </div>
 
- <script src="/voice.js?v=20251001-2" defer></script>
+  <!-- cache bust を付けて更新反映を確実に -->
+  <script src="./voice.js?v=20251003" defer></script>
 </body>
 </html>
-
-

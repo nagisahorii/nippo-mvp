@@ -20,17 +20,17 @@
 
     /* ── 操作帯（録音ボタン） ───────────────────────── */
     .toolbar{position:sticky; top:0; z-index:10; background:var(--card); padding-top:4px; margin:-4px -4px 8px; border-radius:12px;}
-    .toolbar-inner{padding:8px; border-radius:12px; background:#0f172a; color:#fff;}
+    .toolbar-inner{padding:8px; border-radius:12px; background:#f8fafc; border:1px solid #e2e8f0;}
 
     button{border:1px solid var(--border); border-radius:12px; background:#fff; color:var(--fg); font-weight:800; cursor:pointer;}
-    .btn-lg{width:100%; font-size:18px; padding:14px 16px;}
-    .btn-ghost{background:#fff; color:var(--muted); padding:8px 10px; font-size:12px;}
+    .btn-lg{width:100%; font-size:18px; padding:14px 16px; background:#1e3a8a; color:#fff; border:1px solid #1e3a8a;}
+    .btn-ghost{background:transparent; color:#64748b; padding:8px 10px; font-size:12px; border:1px solid transparent;}
 
     /* ── ガイド（カテゴリ） ───────────────────────── */
     .section{border:1px dashed var(--border); border-radius:12px; padding:10px; margin:10px 0;}
     .section h3{margin:0 0 8px; font-size:13px; color:#374151; font-weight:800;}
     .pillbox{display:flex; flex-wrap:wrap; gap:8px;}
-    .pill{display:inline-block; padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:13px; background:#fafafa; color:#374151;}
+    .pill{display:inline-block; padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:13px; background:#fafafa; color:#374151; min-width: 120px; text-align: center; flex: 1 1 auto;}
 
     /* ── プレビュー ＋ 出力 ───────────────────────── */
     .hint{font-size:12px; color:var(--muted); margin:6px 2px 0;}
@@ -50,12 +50,18 @@
 
     /* ── モバイル最適化（iPhone/Android） ───────────────── */
     @media (max-width: 768px){
-      header{font-size:20px;}
-      .wrap{padding:12px;}
-      .btn-lg{font-size:17px; padding:14px 16px;}
-      .pill{font-size:12.5px; padding:6px 10px; flex:1 1 auto; min-width: calc(50% - 8px);} /* 2列で折返し */
-      .actions{grid-template-columns:1fr; } /* 共有とコピーを縦積み */
-      textarea#output{min-height:180px; font-size:16px;}
+      header{font-size:24px; padding:16px 0;}
+      .wrap{padding:16px;}
+      .btn-lg{font-size:20px; padding:18px 20px; min-height: 56px;}
+      .btn-ghost{font-size:14px; padding:10px 12px; min-height: 40px;}
+      .section h3{font-size:16px; margin:0 0 12px;}
+      .pill{font-size:14px; padding:8px 12px; flex:1 1 auto; min-width: calc(50% - 8px); min-height: 40px; display: flex; align-items: center; justify-content: center; min-width: 120px;} /* 2列で折返し */
+      .actions{grid-template-columns:1fr; gap:16px;} /* 共有とコピーを縦積み */
+      .actions button{padding:16px; font-size:18px; min-height: 56px;}
+      textarea#output{min-height:200px; font-size:18px; padding:16px;}
+      .hint{font-size:14px; margin:8px 2px 0;}
+      ol#preview{font-size:16px; margin:12px 0; padding-left:24px;}
+      .status{font-size:14px; margin-top:8px;}
     }
   </style>
 </head>
@@ -68,8 +74,8 @@
       <div class="toolbar">
         <div class="toolbar-inner">
           <div class="row" style="display:flex; gap:8px; align-items:center;">
-            <button id="btn-rec" class="btn-lg">🎙️ 録音開始</button>
-            <button id="btn-clear" class="btn-ghost" title="入力を全て消す">🧹 クリア</button>
+            <button id="btn-rec" class="btn-lg">録音開始</button>
+            <button id="btn-clear" class="btn-ghost" title="入力を全て消す">クリア</button>
           </div>
         </div>
       </div>

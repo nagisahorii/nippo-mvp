@@ -1,9 +1,9 @@
 // api/format.js
 import OpenAI from "openai";
 
-/** --- CORS（kintoneのみ許可） --- */
+/** --- CORS（全ドメイン許可） --- */
 const setCors = (res) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://9n4qfk7h8xgy.cybozu.com");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 };
@@ -98,13 +98,17 @@ export default async function handler(req, res) {
     const raw = (body?.raw || "").trim();
     if (!raw) return res.status(400).json({ error: "raw is required" });
 
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: "OpenAI API key not configured" });
+    }
+    
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     // 1) 成約/非成約の判定（否定優先ヒューリスティック → LLM）
     let outcome = heuristicOutcome(raw);
     if (!outcome) {
       const judge = await client.chat.completions.create({
-        model: "gpt-4.1-mini",
+        model: "gpt-4o-mini",
         temperature: 0,
         messages: [
           {
@@ -123,7 +127,7 @@ export default async function handler(req, res) {
 
     // 2) 抽出整形（追加禁止）
     const completion = await client.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4o-mini",
       temperature: 0,
       messages: [
         { role: "system", content: SYSTEM_EXTRACTIVE },

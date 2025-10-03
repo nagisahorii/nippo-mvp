@@ -114,10 +114,45 @@
   shareBtn.onclick = async ()=>{
     const text = out.value.trim();
     if (!text) return alert("共有するテキストがありません");
-    if (navigator.share){
-      try{ await navigator.share({ text }); setStatus("共有しました","ok"); }catch{}
-    }else{
-      alert("この端末は共有に対応していません。コピーをご利用ください。");
+    
+    // Web Share API が利用可能な場合（より確実にチェック）
+    if (navigator.share) {
+      try {
+        // 共有データを準備
+        const shareData = {
+          text: text,
+          title: '日報',
+          url: window.location.href
+        };
+        
+        // canShareでチェック（利用可能な場合のみ）
+        if (navigator.canShare && !navigator.canShare(shareData)) {
+          throw new Error('このコンテンツは共有できません');
+        }
+        
+        await navigator.share(shareData);
+        setStatus("共有しました","ok");
+        return;
+      } catch (e) {
+        console.log("Web Share API failed:", e);
+        // ユーザーがキャンセルした場合は何もしない
+        if (e.name === 'AbortError') {
+          setStatus("共有をキャンセルしました");
+          return;
+        }
+        // その他のエラーの場合はフォールバックに進む
+      }
+    }
+    
+    // フォールバック: コピー機能
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus("テキストをコピーしました。他のアプリで貼り付けてください。","ok");
+    } catch (e) {
+      // 最終フォールバック: テキストエリアを選択状態にする
+      out.select();
+      out.setSelectionRange(0, 99999);
+      setStatus("テキストを選択しました。手動でコピーしてください。","ok");
     }
   };
 

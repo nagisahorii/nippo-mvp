@@ -23,12 +23,14 @@
     .btn-lg{font-size:32px; padding:28px 24px; min-height: 88px; font-weight: 900; border-radius: 16px;}
     .btn-ghost{font-size:20px; padding:20px 24px; min-height: 64px; border-radius: 12px;}
     
-    /* ガイドリスト - シンプルで読みやすい */
-    .guide-list{margin:16px 0; padding:0;}
+    /* ガイドコンテナ - 全体を囲む */
+    .guide-container{margin:16px 0; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;}
+    .guide-title{font-size:18px; font-weight:700; color:#1f2937; text-align:center; margin-bottom:16px;}
+    .guide-list{margin:0; padding:0;}
     .guide-row{display:flex; gap:12px; margin:8px 0;}
-    .guide-item{flex:1; font-size:16px; padding:12px 16px; background:#f8fafc; 
+    .guide-item{flex:1; font-size:16px; padding:12px 16px; background:#fff; 
                 border-radius:8px; text-align:center; font-weight:600; color:#374151;
-                border:1px solid #e2e8f0;}
+                border:1px solid #d1d5db;}
     
     /* メインコンテンツエリア - 大きく目立つ */
     textarea#output{min-height:400px; font-size:22px; padding:24px; border-radius: 16px; line-height: 1.7; 
@@ -90,12 +92,14 @@
       .btn-lg{font-size:32px; padding:28px 24px; min-height: 88px; font-weight: 900; border-radius: 16px;}
       .btn-ghost{font-size:20px; padding:20px 24px; min-height: 64px; border-radius: 12px;}
       
-      /* ガイドリスト - シンプルで読みやすい */
-      .guide-list{margin:12px 0; padding:0;}
+      /* ガイドコンテナ - 全体を囲む */
+      .guide-container{margin:12px 0; padding:16px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;}
+      .guide-title{font-size:16px; font-weight:700; color:#1f2937; text-align:center; margin-bottom:12px;}
+      .guide-list{margin:0; padding:0;}
       .guide-row{display:flex; gap:8px; margin:6px 0;}
-      .guide-item{flex:1; font-size:15px; padding:10px 12px; background:#f8fafc; 
+      .guide-item{flex:1; font-size:15px; padding:10px 12px; background:#fff; 
                   border-radius:6px; text-align:center; font-weight:600; color:#374151;
-                  border:1px solid #e2e8f0;}
+                  border:1px solid #d1d5db;}
       
       /* メインコンテンツエリア - 大きく目立つ */
       textarea#output{min-height:350px; font-size:20px; padding:20px; border-radius: 14px; line-height: 1.6; 
@@ -121,6 +125,8 @@
       header{font-size:24px; padding:16px 0; text-align: center;}
       .btn-lg{font-size:28px; padding:24px 20px; min-height: 80px;}
       .btn-ghost{font-size:18px; padding:16px 20px; min-height: 56px;}
+      .guide-container{padding:12px; margin:8px 0;}
+      .guide-title{font-size:14px; margin-bottom:8px;}
       .guide-item{font-size:14px; padding:8px 10px; min-height: 36px;}
       textarea#output{font-size:18px; padding:16px; min-height: 300px;}
       .hint{font-size:15px;}
@@ -145,38 +151,39 @@
       </div>
 
       <!-- 話す項目（シンプルリスト） -->
-      <div class="guide-list">
-        <div class="guide-row">
-          <div class="guide-item">体験番号＋成約/非成約</div>
-          <div class="guide-item">年齢</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">仕事</div>
-          <div class="guide-item">運動歴</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">顕在ニーズ</div>
-          <div class="guide-item">潜在ニーズ/インサイト</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">方向性/テーマ</div>
-          <div class="guide-item">感動ポイント＋反応</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">入れた教育（知識共有）</div>
-          <div class="guide-item">断られ理由</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">断りへの返し</div>
-          <div class="guide-item">👍 good</div>
-        </div>
-        <div class="guide-row">
-          <div class="guide-item">↕️ more</div>
-          <div class="guide-item">自由記載</div>
+      <div class="guide-container">
+        <div class="guide-title">次の項目ごとに話すと日報が完成します</div>
+        <div class="guide-list">
+          <div class="guide-row">
+            <div class="guide-item">体験番号＋成約/非成約</div>
+            <div class="guide-item">年齢</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">仕事</div>
+            <div class="guide-item">運動歴</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">顕在ニーズ</div>
+            <div class="guide-item">潜在ニーズ/インサイト</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">方向性/テーマ</div>
+            <div class="guide-item">感動ポイント＋反応</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">入れた教育（知識共有）</div>
+            <div class="guide-item">断られ理由</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">断りへの返し</div>
+            <div class="guide-item">👍 good</div>
+          </div>
+          <div class="guide-row">
+            <div class="guide-item">↕️ more</div>
+            <div class="guide-item">自由記載</div>
+          </div>
         </div>
       </div>
-
-      <div class="hint">ヒント：上の項目に沿って話すと、目標のアウトプットに近づきます。</div>
 
       <!-- リアルタイム認識プレビュー -->
       <ol id="preview" aria-live="polite"></ol>

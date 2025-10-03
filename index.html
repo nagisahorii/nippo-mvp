@@ -23,18 +23,17 @@
     .btn-lg{font-size:32px; padding:28px 24px; min-height: 88px; font-weight: 900; border-radius: 16px;}
     .btn-ghost{font-size:20px; padding:20px 24px; min-height: 64px; border-radius: 12px;}
     
-    /* カテゴリブロック - コンパクトに */
-    .section{margin:16px 0; padding:16px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;}
-    .section h3{font-size:18px; margin:0 0 12px; font-weight: 700; color: #4b5563;}
-    .pill{font-size:14px; padding:8px 12px; min-height: 36px; border-radius: 18px; 
-          flex: 1 1 calc(50% - 6px); margin: 4px 0; font-weight: 600;
-          display: flex; align-items: center; justify-content: center; text-align: center;
-          background: #fff; border: 1px solid #d1d5db; color: #374151;}
+    /* ガイドリスト - シンプルで読みやすい */
+    .guide-list{margin:16px 0; padding:0;}
+    .guide-row{display:flex; gap:12px; margin:8px 0;}
+    .guide-item{flex:1; font-size:16px; padding:12px 16px; background:#f8fafc; 
+                border-radius:8px; text-align:center; font-weight:600; color:#374151;
+                border:1px solid #e2e8f0;}
     
     /* メインコンテンツエリア - 大きく目立つ */
     textarea#output{min-height:400px; font-size:22px; padding:24px; border-radius: 16px; line-height: 1.7; 
                     border: 2px solid #1e3a8a; background: #fefefe;}
-    .hint{font-size:16px; margin:12px 0; line-height: 1.5; color: #6b7280; text-align: center;}
+    .hint{font-size:18px; margin:12px 0; line-height: 1.5; color: #6b7280; text-align: center;}
     ol#preview{font-size:18px; margin:16px 0; padding-left:24px; line-height: 1.6; 
                background: #f0f9ff; padding: 16px; border-radius: 12px; border-left: 4px solid #1e3a8a;}
     ol#preview li{margin: 8px 0; padding: 4px 0;}
@@ -44,7 +43,7 @@
     .actions button{padding:20px; font-size:20px; min-height: 72px; border-radius: 16px; font-weight: 700;}
     
     /* ステータス */
-    .status{font-size:16px; margin-top:12px; padding: 8px 0; text-align: center;}
+    .status{font-size:18px; margin-top:12px; padding: 8px 0; text-align: center;}
     .toolbar-inner{padding:20px; border-radius: 16px;}
     .card{padding:24px; border-radius: 20px;}
 
@@ -91,18 +90,17 @@
       .btn-lg{font-size:32px; padding:28px 24px; min-height: 88px; font-weight: 900; border-radius: 16px;}
       .btn-ghost{font-size:20px; padding:20px 24px; min-height: 64px; border-radius: 12px;}
       
-      /* カテゴリブロック - コンパクトに */
-      .section{margin:12px 0; padding:12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;}
-      .section h3{font-size:16px; margin:0 0 8px; font-weight: 700; color: #4b5563;}
-      .pill{font-size:13px; padding:6px 10px; min-height: 32px; border-radius: 16px; 
-            flex: 1 1 calc(50% - 4px); margin: 3px 0; font-weight: 600;
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            background: #fff; border: 1px solid #d1d5db; color: #374151;}
+      /* ガイドリスト - シンプルで読みやすい */
+      .guide-list{margin:12px 0; padding:0;}
+      .guide-row{display:flex; gap:8px; margin:6px 0;}
+      .guide-item{flex:1; font-size:15px; padding:10px 12px; background:#f8fafc; 
+                  border-radius:6px; text-align:center; font-weight:600; color:#374151;
+                  border:1px solid #e2e8f0;}
       
       /* メインコンテンツエリア - 大きく目立つ */
       textarea#output{min-height:350px; font-size:20px; padding:20px; border-radius: 14px; line-height: 1.6; 
                       border: 2px solid #1e3a8a; background: #fefefe;}
-      .hint{font-size:14px; margin:8px 0; line-height: 1.4; color: #6b7280; text-align: center;}
+      .hint{font-size:16px; margin:8px 0; line-height: 1.4; color: #6b7280; text-align: center;}
       ol#preview{font-size:16px; margin:12px 0; padding-left:20px; line-height: 1.5; 
                  background: #f0f9ff; padding: 12px; border-radius: 10px; border-left: 3px solid #1e3a8a;}
       ol#preview li{margin: 6px 0; padding: 3px 0;}
@@ -112,7 +110,7 @@
       .actions button{padding:16px; font-size:18px; min-height: 64px; border-radius: 14px; font-weight: 700;}
       
       /* ステータス */
-      .status{font-size:14px; margin-top:8px; padding: 6px 0; text-align: center;}
+      .status{font-size:16px; margin-top:8px; padding: 6px 0; text-align: center;}
       .toolbar-inner{padding:16px; border-radius: 14px;}
       .card{padding:20px; border-radius: 16px;}
     }
@@ -123,10 +121,9 @@
       header{font-size:24px; padding:16px 0; text-align: center;}
       .btn-lg{font-size:28px; padding:24px 20px; min-height: 80px;}
       .btn-ghost{font-size:18px; padding:16px 20px; min-height: 56px;}
-      .section h3{font-size:14px; margin:0 0 6px;}
-      .pill{font-size:12px; padding:5px 8px; min-height: 28px;}
+      .guide-item{font-size:14px; padding:8px 10px; min-height: 36px;}
       textarea#output{font-size:18px; padding:16px; min-height: 300px;}
-      .hint{font-size:13px;}
+      .hint{font-size:15px;}
       ol#preview{font-size:15px;}
       .actions button{font-size:16px; padding:14px; min-height: 56px;}
     }
@@ -147,36 +144,35 @@
         </div>
       </div>
 
-      <!-- 話す項目（カテゴリ別） -->
-      <div class="section">
-        <h3>基本情報</h3>
-        <div class="pillbox">
-          <span class="pill">体験番号＋成約/非成約</span>
-          <span class="pill">年齢</span>
-          <span class="pill">仕事</span>
-          <span class="pill">運動歴</span>
+      <!-- 話す項目（シンプルリスト） -->
+      <div class="guide-list">
+        <div class="guide-row">
+          <div class="guide-item">体験番号＋成約/非成約</div>
+          <div class="guide-item">年齢</div>
         </div>
-      </div>
-
-      <div class="section">
-        <h3>ニーズ・反応</h3>
-        <div class="pillbox">
-          <span class="pill">顕在ニーズ</span>
-          <span class="pill">潜在ニーズ/インサイト</span>
-          <span class="pill">方向性/テーマ</span>
-          <span class="pill">感動ポイント＋反応</span>
-          <span class="pill">入れた教育（知識共有）</span>
+        <div class="guide-row">
+          <div class="guide-item">仕事</div>
+          <div class="guide-item">運動歴</div>
         </div>
-      </div>
-
-      <div class="section">
-        <h3>追加要素</h3>
-        <div class="pillbox">
-          <span class="pill">断られ理由</span>
-          <span class="pill">断りへの返し</span>
-          <span class="pill">👍 good</span>
-          <span class="pill">↕️ more</span>
-          <span class="pill">自由記載</span>
+        <div class="guide-row">
+          <div class="guide-item">顕在ニーズ</div>
+          <div class="guide-item">潜在ニーズ/インサイト</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-item">方向性/テーマ</div>
+          <div class="guide-item">感動ポイント＋反応</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-item">入れた教育（知識共有）</div>
+          <div class="guide-item">断られ理由</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-item">断りへの返し</div>
+          <div class="guide-item">👍 good</div>
+        </div>
+        <div class="guide-row">
+          <div class="guide-item">↕️ more</div>
+          <div class="guide-item">自由記載</div>
         </div>
       </div>
 

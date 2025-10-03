@@ -2,106 +2,133 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>日報作成アプリ</title>
   <style>
-    :root {
-      --bg:#f7f7fb; --fg:#111827; --muted:#6b7280; --border:#e5e7eb; --accent:#111827;
+    :root{
+      --bg:#f7f7fb; --card:#fff; --fg:#111827; --muted:#6b7280; --border:#e5e7eb; --accent:#111827;
       --ok:#059669; --err:#ef4444;
+      --shadow:0 10px 20px rgba(0,0,0,.06);
+      --radius:14px;
     }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif; background:var(--bg); color:var(--fg); margin:0; }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
-    header { font-weight: 800; font-size: 22px; padding: 12px 0; }
-    .card { background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 20px rgba(0,0,0,.06); padding:14px; }
-    .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; align-items:center; }
-    button { border:1px solid var(--border); border-radius:12px; background:#fff; font-weight:800; cursor:pointer; }
-    #btn-rec { flex:1 1 100%; font-size:20px; padding:16px 18px; background:var(--accent); color:#fff; border-color:var(--accent); }
-    #btn-clear { flex:0 0 auto; font-size:12px; padding:6px 10px; color:#374151; }
-    #btn-share,#btn-copy { flex:1 1 0; padding:10px 12px; }
-    button[disabled] { opacity:.5; cursor:not-allowed; }
-    .hint { font-size:12px; color:var(--muted); margin-top:4px; }
+    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    html,body{margin:0; padding:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;}
+    .wrap{max-width: 720px; margin: env(safe-area-inset-top) auto env(safe-area-inset-bottom); padding:16px;}
+    header{font-weight:800; font-size:22px; padding:12px 0;}
 
-    /* 話す項目（カテゴリ分け） */
-    .sections { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
-    .section { border:1px dashed var(--border); border-radius:10px; padding:8px; background:#fafafa; }
-    .section-title { font-size:12px; font-weight:800; color:#374151; margin-bottom:6px; }
-    .pill { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; margin:4px 6px 0 0; font-size:12px; color:#374151; background:#fff; }
+    .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px;}
 
-    ol { max-height: 150px; overflow:auto; margin:8px 0; padding-left: 20px; font-size:14px; }
-    textarea { width:100%; min-height: 220px; resize: vertical; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; }
+    /* ── 操作帯（録音ボタン） ───────────────────────── */
+    .toolbar{position:sticky; top:0; z-index:10; background:var(--card); padding-top:4px; margin:-4px -4px 8px; border-radius:12px;}
+    .toolbar-inner{padding:8px; border-radius:12px; background:#0f172a; color:#fff;}
 
-    .status { display:flex; align-items:center; gap:8px; }
-    .spinner { width:14px; height:14px; border-radius:50%; border:2px solid #e5e7eb; border-top-color:#9ca3af; animation:spin 1s linear infinite; display:none; }
-    .spinner.on { display:inline-block; }
-    .status.ok { color:var(--ok); }
-    .status.err { color:var(--err); }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    button{border:1px solid var(--border); border-radius:12px; background:#fff; color:var(--fg); font-weight:800; cursor:pointer;}
+    .btn-lg{width:100%; font-size:18px; padding:14px 16px;}
+    .btn-ghost{background:#fff; color:var(--muted); padding:8px 10px; font-size:12px;}
 
-    /* 未来拡張用（成約判定で薄くする時に使う） */
-    .disabled { opacity:.4; pointer-events:none; }
+    /* ── ガイド（カテゴリ） ───────────────────────── */
+    .section{border:1px dashed var(--border); border-radius:12px; padding:10px; margin:10px 0;}
+    .section h3{margin:0 0 8px; font-size:13px; color:#374151; font-weight:800;}
+    .pillbox{display:flex; flex-wrap:wrap; gap:8px;}
+    .pill{display:inline-block; padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:13px; background:#fafafa; color:#374151;}
+
+    /* ── プレビュー ＋ 出力 ───────────────────────── */
+    .hint{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+    ol#preview{margin:8px 0; padding-left:20px; font-size:14px; max-height:150px; overflow:auto;}
+    textarea#output{width:100%; min-height:220px; font-size:15px; padding:12px; border:1px solid var(--border); border-radius:12px; resize:vertical; background:#fff;}
+
+    /* ── 共有／コピー ───────────────────────── */
+    .actions{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;}
+    .actions button{padding:12px; font-size:16px;}
+
+    /* ── ステータス ───────────────────────── */
+    .status{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin-top:6px;}
+    .status.ok{color:var(--ok);} .status.err{color:var(--err);}
+    .spinner{width:14px; height:14px; border-radius:50%; border:2px solid #e5e7eb; border-top-color:#9ca3af; display:none; animation:spin 1s linear infinite;}
+    .spinner.on{display:inline-block;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── モバイル最適化（iPhone/Android） ───────────────── */
+    @media (max-width: 768px){
+      header{font-size:20px;}
+      .wrap{padding:12px;}
+      .btn-lg{font-size:17px; padding:14px 16px;}
+      .pill{font-size:12.5px; padding:6px 10px; flex:1 1 auto; min-width: calc(50% - 8px);} /* 2列で折返し */
+      .actions{grid-template-columns:1fr; } /* 共有とコピーを縦積み */
+      textarea#output{min-height:180px; font-size:16px;}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>日報作成アプリ</header>
+
     <div class="card">
-
-      <!-- 大ボタン + クリア(小) -->
-      <div class="row">
-        <button id="btn-rec">🎤 録音開始</button>
-        <button id="btn-clear" title="入力を全て消す">🧹 クリア</button>
+      <!-- 録音操作帯（常に上に見える） -->
+      <div class="toolbar">
+        <div class="toolbar-inner">
+          <div class="row" style="display:flex; gap:8px; align-items:center;">
+            <button id="btn-rec" class="btn-lg">🎙️ 録音開始</button>
+            <button id="btn-clear" class="btn-ghost" title="入力を全て消す">🧹 クリア</button>
+          </div>
+        </div>
       </div>
 
-      <!-- 状態表示（ボタン直下で常時見える） -->
-      <div class="status hint" id="status" aria-live="polite">
-        <span class="spinner" id="spin"></span>
-        <span id="status-text">準備OK。録音を開始してください。</span>
-      </div>
-
-      <!-- 話す項目：カテゴリ分けで視認性UP -->
-      <div class="sections" aria-label="話す項目一覧">
-        <div class="section">
-          <div class="section-title">基本情報</div>
+      <!-- 話す項目（カテゴリ別） -->
+      <div class="section">
+        <h3>基本情報</h3>
+        <div class="pillbox">
           <span class="pill">体験番号＋成約/非成約</span>
           <span class="pill">年齢</span>
           <span class="pill">仕事</span>
           <span class="pill">運動歴</span>
         </div>
-        <div class="section">
-          <div class="section-title">ニーズ・反応</div>
+      </div>
+
+      <div class="section">
+        <h3>ニーズ・反応</h3>
+        <div class="pillbox">
           <span class="pill">顕在ニーズ</span>
           <span class="pill">潜在ニーズ/インサイト</span>
           <span class="pill">方向性/テーマ</span>
           <span class="pill">感動ポイント＋反応</span>
           <span class="pill">入れた教育（知識共有）</span>
         </div>
-        <div class="section">
-          <div class="section-title">追加要素</div>
-          <span class="pill" data-type="hiseiyaku">断られ理由</span>
-          <span class="pill" data-type="hiseiyaku">断りへの返し</span>
+      </div>
+
+      <div class="section">
+        <h3>追加要素</h3>
+        <div class="pillbox">
+          <span class="pill">断られ理由</span>
+          <span class="pill">断りへの返し</span>
           <span class="pill">👍 good</span>
           <span class="pill">↕️ more</span>
           <span class="pill">自由記載</span>
         </div>
       </div>
-      <div class="hint">上の項目に沿って話してください（例：基本情報→ニーズ・反応→追加要素）。</div>
+
+      <div class="hint">ヒント：上の項目に沿って話すと、目標のアウトプットに近づきます。</div>
 
       <!-- リアルタイム認識プレビュー -->
       <ol id="preview" aria-live="polite"></ol>
 
-      <!-- 出力（停止→自動変換後に表示） -->
-      <textarea id="output" placeholder="変換結果がここに表示されます（Slackで共有）"></textarea>
+      <!-- 変換結果 -->
+      <textarea id="output" placeholder="変換結果がここに表示されます（Slackで共有/コピー）"></textarea>
 
-      <!-- 共有/コピー -->
-      <div class="row">
+      <!-- 共有／コピー -->
+      <div class="actions">
         <button id="btn-share">共有</button>
         <button id="btn-copy">コピー</button>
+      </div>
+
+      <!-- ステータス -->
+      <div class="status" id="status">
+        <span class="spinner" id="spin"></span>
+        <span id="status-text">準備OK</span>
       </div>
     </div>
   </div>
 
-  <!-- cache bust を付けて更新反映を確実に -->
-  <script src="./voice.js?v=20251003" defer></script>
+  <script src="./voice.js" defer></script>
 </body>
 </html>

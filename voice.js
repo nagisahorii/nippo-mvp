@@ -226,50 +226,50 @@
     try {
       console.log("recBtn.onclickを設定中...");
       recBtn.onclick = async ()=>{
-      console.log("録音ボタンがクリックされました");
-      console.log("sr:", sr);
-      console.log("on:", on);
-      if (!sr){ alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
-      if (!on){
-        try{
-          if (navigator.mediaDevices?.getUserMedia){
-            const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-            stream.getTracks().forEach(t=>t.stop());
+        console.log("録音ボタンがクリックされました");
+        console.log("sr:", sr);
+        console.log("on:", on);
+        if (!sr){ alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
+        if (!on){
+          try{
+            if (navigator.mediaDevices?.getUserMedia){
+              const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+              stream.getTracks().forEach(t=>t.stop());
+            }
+          }catch{
+            setStatus("マイク権限がありません。URLバーのマイクから許可してください。","err");
+            return;
           }
-        }catch{
-          setStatus("マイク権限がありません。URLバーのマイクから許可してください。","err");
-          return;
+          buffer=[]; prv.innerHTML="";
+          try{ sr.start(); on=true; recBtn.textContent="■ 停止"; setStatus("録音中…"); }
+          catch{ setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); }
+        }else{
+          try{ sr.stop(); }catch{}
+          on=false; recBtn.textContent="🎙️ 録音開始";
+          setStatus("変換中…"); setBusy(true);
+          endTimer = setTimeout(()=> convertNow(), 800); // 保険
         }
-        buffer=[]; prv.innerHTML="";
-        try{ sr.start(); on=true; recBtn.textContent="■ 停止"; setStatus("録音中…"); }
-        catch{ setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); }
-      }else{
-        try{ sr.stop(); }catch{}
-        on=false; recBtn.textContent="🎙️ 録音開始";
-        setStatus("変換中…"); setBusy(true);
-        endTimer = setTimeout(()=> convertNow(), 800); // 保険
-      }
-    };
+      };
 
-    clrBtn.onclick = ()=>{
-      if (on) return alert("録音中です。先に停止してください。");
-      prv.innerHTML = ""; out.value = ""; setStatus("クリアしました。");
-    };
+      clrBtn.onclick = ()=>{
+        if (on) return alert("録音中です。先に停止してください。");
+        prv.innerHTML = ""; out.value = ""; setStatus("クリアしました。");
+      };
 
-    shareBtn.onclick = async ()=>{
-      const text = out.value.trim();
-      if (!text) return alert("共有するテキストがありません");
-      await shareText(text);
-    };
+      shareBtn.onclick = async ()=>{
+        const text = out.value.trim();
+        if (!text) return alert("共有するテキストがありません");
+        await shareText(text);
+      };
 
-    copyBtn.onclick = async ()=>{
-      const text = out.value.trim();
-      if (!text) return alert("コピーするテキストがありません");
-      await navigator.clipboard.writeText(text);
-      setStatus("コピーしました。Slackで共有してください。","ok");
-    };
+      copyBtn.onclick = async ()=>{
+        const text = out.value.trim();
+        if (!text) return alert("コピーするテキストがありません");
+        await navigator.clipboard.writeText(text);
+        setStatus("コピーしました。Slackで共有してください。","ok");
+      };
     
-    console.log("イベントハンドラー設定完了");
+      console.log("イベントハンドラー設定完了");
     } catch (error) {
       console.error("イベントハンドラー設定エラー:", error);
     }

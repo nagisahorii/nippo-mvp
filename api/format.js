@@ -5,9 +5,10 @@ import OpenAI from "openai";
 const setCors = (res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
   res.setHeader("Access-Control-Max-Age", "86400");
   res.setHeader("Access-Control-Allow-Credentials", "false");
+  res.setHeader("Vary", "Origin");
 };
 
 /** --- 出力テンプレ（※プラン注記はテンプレに書かない） --- */
@@ -89,11 +90,16 @@ ${tmpl}
 }
 
 export default async function handler(req, res) {
+  // CORS設定を最初に適用
   setCors(res);
-  
+
+  // OPTIONSリクエストの処理（プリフライトリクエスト）
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+
+  // 認証を完全に無効化
+  console.log("API呼び出し:", req.method, req.url);
   
   if (req.method === "GET") {
     return res.status(200).json({ ok: true, route: "/api/format" });

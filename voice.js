@@ -3,7 +3,7 @@
   console.log("voice.js開始");
   console.log("document.readyState:", document.readyState);
   
-  const API_BASE = "https://nippo-mvp-mlye-p3x9d8a4d-nagisa-horiis-projects.vercel.app";
+  const API_BASE = "https://nippo-mvp-mlye-62y12rkt0-nagisa-horiis-projects.vercel.app";
   const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -169,8 +169,6 @@
     if (buffer.length === 0) { setStatus("変換するテキストがありません"); setBusy(false); return; }
     const text = buffer.join(" ");
     console.log("変換開始:", text);
-    
-    // まずVercelのAPIを試行
     try {
       const res = await fetch(`${API_BASE}${API_PATH}`, {
         method: "POST",
@@ -183,76 +181,10 @@
       if (out) out.value = data.text || "変換に失敗しました";
       setStatus("変換完了！", "ok");
     } catch (e) {
-      console.error("API変換エラー:", e);
-      console.log("フォールバック変換を実行中...");
-      
-      // フォールバック: クライアントサイド変換
-      try {
-        const result = convertTextToReport(text);
-        if (out) out.value = result;
-        setStatus("変換完了（フォールバック）！", "ok");
-      } catch (fallbackError) {
-        console.error("フォールバック変換エラー:", fallbackError);
-        setStatus(`変換エラー: ${e.message}`, "err");
-      }
+      console.error("変換エラー:", e);
+      setStatus(`変換エラー: ${e.message}`, "err");
     }
     setBusy(false);
-  };
-
-  // クライアントサイド変換関数
-  const convertTextToReport = (text) => {
-    // 成約/非成約の判定
-    const isNonContract = /(非成約|未成約|見送り|保留|検討したい|家族に相談|他社(も)?検討|また連絡|今日は決め|決められない|決めません|成約しない|成約しません|入会しない|入会しません|契約しない|契約しません|申込しない|申込しません|申し込まない|申し込みません|断られた|遠い)/.test(text);
-    
-    // 体験番号の抽出
-    const expMatch = text.match(/体験番号(\d+)/);
-    const expNum = expMatch ? expMatch[1] : "—";
-    
-    // 年齢の抽出
-    const ageMatch = text.match(/(\d+)歳/);
-    const age = ageMatch ? ageMatch[1] : "—";
-    
-    // 仕事の抽出
-    const jobMatch = text.match(/(デスクワーク|営業|事務|販売|接客|製造|工場|建設|運転|清掃|警備|介護|看護|教師|公務員|自営業|フリーランス|学生|無職|その他)/);
-    const job = jobMatch ? jobMatch[1] : "—";
-    
-    // 運動歴の抽出
-    const exerciseMatch = text.match(/運動歴[はは]?([^。]+)/);
-    const exercise = exerciseMatch ? exerciseMatch[1].trim() : "—";
-    
-    // プランの抽出
-    const planMatch = text.match(/月(\d+)/);
-    const plan = planMatch ? `月${planMatch[1]}` : "";
-    
-    if (isNonContract) {
-      return `【体験番号 ⇨ 非成約】
-【年齢】${age}
-【仕事】${job}
-【運動歴】${exercise}
-【顕在ニーズ】—
-【潜在ニーズ/インサイト】—
-【自分が決めた方向性やテーマ】—
-【感動ポイントと反応】—
-【どんな教育（知識共有）を入れたか】—
-【何と言われて断られたか】—
-【断られた返し】—
-【👍 good】—
-【↕️ more】—
-【自由記載欄】—`;
-    } else {
-      return `【体験番号 ⇨ 成約${plan ? `（${plan}）` : ''}】
-【年齢】${age}
-【仕事】${job}
-【運動歴】${exercise}
-【顕在ニーズ】—
-【潜在ニーズ/インサイト】—
-【自分が決めた方向性やテーマ】—
-【感動ポイントと反応】—
-【どんな教育（知識共有）を入れたか】—
-【👍 good】—
-【↕️ more】—
-【自由記載欄】—`;
-    }
   };
 
 

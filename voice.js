@@ -4,18 +4,31 @@
   const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recBtn = document.getElementById("btn-rec");
-  const clrBtn = document.getElementById("btn-clear");
-  const prv = document.getElementById("preview");
-  const out = document.getElementById("output");
-  const shareBtn = document.getElementById("btn-share");
-  const copyBtn = document.getElementById("btn-copy");
-  const statusEl = document.getElementById("status");
-  const statusText = document.getElementById("status-text");
-  const spin = document.getElementById("spin");
-
+  
+  // DOM要素を取得する関数
+  const getElements = () => {
+    const recBtn = document.getElementById("btn-rec");
+    const clrBtn = document.getElementById("btn-clear");
+    const prv = document.getElementById("preview");
+    const out = document.getElementById("output");
+    const shareBtn = document.getElementById("btn-share");
+    const copyBtn = document.getElementById("btn-copy");
+    const statusEl = document.getElementById("status");
+    const statusText = document.getElementById("status-text");
+    const spin = document.getElementById("spin");
+    
+    console.log("要素の取得状況:");
+    console.log("recBtn:", recBtn);
+    console.log("clrBtn:", clrBtn);
+    console.log("prv:", prv);
+    console.log("out:", out);
+    
+    return { recBtn, clrBtn, prv, out, shareBtn, copyBtn, statusEl, statusText, spin };
+  };
+  
   let sr = null, on = false, buffer = [];
   let endTimer = null;
+  let recBtn, clrBtn, prv, out, shareBtn, copyBtn, statusEl, statusText, spin;
 
   const setStatus = (msg, type = "hint") => {
     statusEl.classList.remove("ok","err");
@@ -165,4 +178,79 @@
     await navigator.clipboard.writeText(text);
     setStatus("コピーしました。Slackで共有してください。","ok");
   };
+
+  // DOMContentLoadedイベントで初期化
+  const init = () => {
+    const elements = getElements();
+    recBtn = elements.recBtn;
+    clrBtn = elements.clrBtn;
+    prv = elements.prv;
+    out = elements.out;
+    shareBtn = elements.shareBtn;
+    copyBtn = elements.copyBtn;
+    statusEl = elements.statusEl;
+    statusText = elements.statusText;
+    spin = elements.spin;
+
+    if (!recBtn) {
+      console.error("録音ボタンが見つかりません");
+      return;
+    }
+
+    // イベントハンドラーを設定
+    setupEventHandlers();
+  };
+
+  const setupEventHandlers = () => {
+    recBtn.onclick = async ()=>{
+      console.log("録音ボタンがクリックされました");
+      console.log("sr:", sr);
+      console.log("on:", on);
+      if (!sr){ alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
+      if (!on){
+        try{
+          if (navigator.mediaDevices?.getUserMedia){
+            const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+            stream.getTracks().forEach(t=>t.stop());
+          }
+        }catch{
+          setStatus("マイク権限がありません。URLバーのマイクから許可してください。","err");
+          return;
+        }
+        buffer=[]; prv.innerHTML="";
+        try{ sr.start(); on=true; recBtn.textContent="■ 停止"; setStatus("録音中…"); }
+        catch{ setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); }
+      }else{
+        try{ sr.stop(); }catch{}
+        on=false; recBtn.textContent="🎙️ 録音開始";
+        setStatus("変換中…"); setBusy(true);
+        endTimer = setTimeout(()=> convertNow(), 800); // 保険
+      }
+    };
+
+    clrBtn.onclick = ()=>{
+      if (on) return alert("録音中です。先に停止してください。");
+      prv.innerHTML = ""; out.value = ""; setStatus("クリアしました。");
+    };
+
+    shareBtn.onclick = async ()=>{
+      const text = out.value.trim();
+      if (!text) return alert("共有するテキストがありません");
+      await shareText(text);
+    };
+
+    copyBtn.onclick = async ()=>{
+      const text = out.value.trim();
+      if (!text) return alert("コピーするテキストがありません");
+      await navigator.clipboard.writeText(text);
+      setStatus("コピーしました。Slackで共有してください。","ok");
+    };
+  };
+
+  // DOMContentLoadedイベントで初期化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

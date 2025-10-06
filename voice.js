@@ -11,15 +11,19 @@
   
   // DOM要素を取得する関数
   const getElements = () => {
-    const recBtn = document.getElementById("btn-rec");
-    const clrBtn = document.getElementById("btn-clear");
-    const prv = document.getElementById("preview");
-    const out = document.getElementById("output");
-    const shareBtn = document.getElementById("btn-share");
-    const copyBtn = document.getElementById("btn-copy");
-    const statusEl = document.getElementById("status");
-    const statusText = document.getElementById("status-text");
-    const spin = document.getElementById("spin");
+    console.log("要素取得開始");
+    console.log("document.body:", document.body);
+    console.log("document.querySelector('#btn-rec'):", document.querySelector('#btn-rec'));
+    
+    const recBtn = document.getElementById("btn-rec") || document.querySelector("#btn-rec");
+    const clrBtn = document.getElementById("btn-clear") || document.querySelector("#btn-clear");
+    const prv = document.getElementById("preview") || document.querySelector("#preview");
+    const out = document.getElementById("output") || document.querySelector("#output");
+    const shareBtn = document.getElementById("btn-share") || document.querySelector("#btn-share");
+    const copyBtn = document.getElementById("btn-copy") || document.querySelector("#btn-copy");
+    const statusEl = document.getElementById("status") || document.querySelector("#status");
+    const statusText = document.getElementById("status-text") || document.querySelector("#status-text");
+    const spin = document.getElementById("spin") || document.querySelector("#spin");
     
     console.log("要素の取得状況:");
     console.log("recBtn:", recBtn);
@@ -258,6 +262,10 @@
   // 常にDOMContentLoadedイベントを待機
   document.addEventListener('DOMContentLoaded', () => {
     console.log("DOMContentLoadedイベント発生");
-    init();
+    // 少し遅延させて実行
+    setTimeout(() => {
+      console.log("遅延実行開始");
+      init();
+    }, 100);
   });
 })();

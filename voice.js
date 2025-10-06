@@ -20,12 +20,32 @@
     // すべてのボタンを詳細に調査
     const allButtons = document.querySelectorAll('button');
     console.log("すべてのボタン:", allButtons);
+    console.log("ボタンの数:", allButtons.length);
     allButtons.forEach((btn, index) => {
       console.log(`ボタン${index}:`, btn);
       console.log(`  - id: ${btn.id}`);
       console.log(`  - class: ${btn.className}`);
       console.log(`  - text: ${btn.textContent}`);
+      console.log(`  - visible: ${btn.offsetParent !== null}`);
     });
+    
+    // 特定のテキストを含む要素を検索
+    const elementsWithText = document.querySelectorAll('*');
+    const recordingElements = Array.from(elementsWithText).filter(el => 
+      el.textContent && el.textContent.includes('録音開始')
+    );
+    console.log("'録音開始'を含む要素:", recordingElements);
+    recordingElements.forEach((el, index) => {
+      console.log(`録音要素${index}:`, el);
+      console.log(`  - tagName: ${el.tagName}`);
+      console.log(`  - id: ${el.id}`);
+      console.log(`  - class: ${el.className}`);
+      console.log(`  - text: ${el.textContent}`);
+    });
+    
+    // HTMLの内容を確認
+    console.log("document.documentElement.outerHTML:", document.documentElement.outerHTML.substring(0, 1000) + "...");
+    console.log("document.body.innerHTML:", document.body.innerHTML.substring(0, 1000) + "...");
     
     // kintone内のiframeの可能性を確認
     console.log("window.parent:", window.parent);
@@ -47,11 +67,34 @@
       }
     }
     
+    // より詳細な要素検索
+    console.log("document.querySelectorAll('[id*=\"btn\"]'):", document.querySelectorAll('[id*="btn"]'));
+    console.log("document.querySelectorAll('[class*=\"btn\"]'):", document.querySelectorAll('[class*="btn"]'));
+    console.log("document.querySelectorAll('button[class*=\"btn-lg\"]'):", document.querySelectorAll('button[class*="btn-lg"]'));
+    
     // より広範囲で要素を検索
-    const recBtn = document.getElementById("btn-rec") || 
-                   document.querySelector("#btn-rec") || 
-                   document.querySelector("button[class*='btn-lg']") ||
-                   Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("録音開始"));
+    let recBtn = document.getElementById("btn-rec") || 
+                 document.querySelector("#btn-rec") || 
+                 document.querySelector("button[class*='btn-lg']") ||
+                 Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("録音開始"));
+    
+    // まだ見つからない場合は、より詳細に検索
+    if (!recBtn) {
+      console.log("録音ボタンが見つからないため、より詳細に検索中...");
+      
+      // すべての要素から検索
+      const allElements = document.querySelectorAll('*');
+      recBtn = Array.from(allElements).find(el => 
+        el.textContent && el.textContent.trim() === '録音開始' && 
+        (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'A')
+      );
+      
+      if (recBtn) {
+        console.log("録音ボタンを発見:", recBtn);
+      } else {
+        console.log("録音ボタンが見つかりませんでした");
+      }
+    }
     
     const clrBtn = document.getElementById("btn-clear") || 
                    document.querySelector("#btn-clear") || 

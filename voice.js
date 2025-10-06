@@ -168,6 +168,7 @@
   const convertNow = async () => {
     if (buffer.length === 0) { setStatus("変換するテキストがありません"); setBusy(false); return; }
     const text = buffer.join(" ");
+    console.log("変換開始:", text);
     try {
       const res = await fetch(`${API_BASE}${API_PATH}`, {
         method: "POST",
@@ -176,6 +177,7 @@
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      console.log("APIレスポンス:", data);
       if (out) out.value = data.text || "変換に失敗しました";
       setStatus("変換完了！", "ok");
     } catch (e) {

@@ -279,15 +279,9 @@
   console.log("初期化処理開始");
   console.log("document.readyState:", document.readyState);
   
-  if (document.readyState === 'loading') {
-    console.log("DOMContentLoadedイベントを待機");
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    console.log("即座に初期化実行");
-    // 少し遅延させて実行
-    setTimeout(() => {
-      console.log("遅延実行開始");
-      init();
-    }, 100);
-  }
+  // 常にDOMContentLoadedイベントを待機
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoadedイベント発生");
+    init();
+  });
 })();

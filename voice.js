@@ -87,6 +87,9 @@
   }
 
   recBtn.onclick = async ()=>{
+    console.log("録音ボタンがクリックされました");
+    console.log("sr:", sr);
+    console.log("on:", on);
     if (!sr){ alert("対応ブラウザでお試しください（PCのChrome/Edge推奨）"); return; }
     if (!on){
       try{

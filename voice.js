@@ -3,6 +3,8 @@
   console.log("voice.js開始");
   console.log("document.readyState:", document.readyState);
   
+  const API_BASE = "https://nippo-mvp-mlye-p3x9d8a4d-nagisa-horiis-projects.vercel.app";
+  const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   console.log("SR:", SR);
@@ -164,12 +166,22 @@
   };
 
   const convertNow = async () => {
-    if (buffer.length === 0) { setStatus("録音されたテキストがありません"); setBusy(false); return; }
+    if (buffer.length === 0) { setStatus("変換するテキストがありません"); setBusy(false); return; }
     const text = buffer.join(" ");
-    
-    // 録音したテキストをそのまま表示
-    if (out) out.value = text;
-    setStatus("録音完了！", "ok");
+    try {
+      const res = await fetch(`${API_BASE}${API_PATH}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (out) out.value = data.text || "変換に失敗しました";
+      setStatus("変換完了！", "ok");
+    } catch (e) {
+      console.error("変換エラー:", e);
+      setStatus(`変換エラー: ${e.message}`, "err");
+    }
     setBusy(false);
   };
 

@@ -1,9 +1,13 @@
 // voice.js
 (() => {
+  console.log("voice.js開始");
+  console.log("document.readyState:", document.readyState);
+  
   const API_BASE = "https://nippo-mvp-mlye-ealwetn42-nagisa-horiis-projects.vercel.app";
   const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  console.log("SR:", SR);
   
   // DOM要素を取得する関数
   const getElements = () => {
@@ -219,7 +223,9 @@
       return;
     }
     
-    recBtn.onclick = async ()=>{
+    try {
+      console.log("recBtn.onclickを設定中...");
+      recBtn.onclick = async ()=>{
       console.log("録音ボタンがクリックされました");
       console.log("sr:", sr);
       console.log("on:", on);
@@ -262,13 +268,26 @@
       await navigator.clipboard.writeText(text);
       setStatus("コピーしました。Slackで共有してください。","ok");
     };
+    
+    console.log("イベントハンドラー設定完了");
+    } catch (error) {
+      console.error("イベントハンドラー設定エラー:", error);
+    }
   };
 
   // DOMContentLoadedイベントで初期化
+  console.log("初期化処理開始");
+  console.log("document.readyState:", document.readyState);
+  
   if (document.readyState === 'loading') {
+    console.log("DOMContentLoadedイベントを待機");
     document.addEventListener('DOMContentLoaded', init);
   } else {
+    console.log("即座に初期化実行");
     // 少し遅延させて実行
-    setTimeout(init, 100);
+    setTimeout(() => {
+      console.log("遅延実行開始");
+      init();
+    }, 100);
   }
 })();

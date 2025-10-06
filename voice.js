@@ -3,8 +3,8 @@
   console.log("voice.js開始");
   console.log("document.readyState:", document.readyState);
   
-  const API_BASE = "https://nippo-mvp-mlye-62y12rkt0-nagisa-horiis-projects.vercel.app";
-  const API_PATH = "/api/format";
+  const API_BASE = "https://nagisahorii.github.io/nippo-mvp";
+  const API_PATH = "/.netlify/functions/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   console.log("SR:", SR);

@@ -1,8 +1,16 @@
 {
   "name": "nippo-mvp",
-  "private": true,
-  "type": "module",
+  "version": "1.0.0",
+  "description": "日報作成アプリ",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "dev": "python3 -m http.server 8000"
+  },
   "dependencies": {
-    "openai": "^4.57.0"
+    "openai": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

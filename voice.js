@@ -14,16 +14,45 @@
     console.log("要素取得開始");
     console.log("document.body:", document.body);
     console.log("document.querySelector('#btn-rec'):", document.querySelector('#btn-rec'));
+    console.log("document.querySelectorAll('button'):", document.querySelectorAll('button'));
+    console.log("document.querySelectorAll('[id]'):", document.querySelectorAll('[id]'));
     
-    const recBtn = document.getElementById("btn-rec") || document.querySelector("#btn-rec");
-    const clrBtn = document.getElementById("btn-clear") || document.querySelector("#btn-clear");
-    const prv = document.getElementById("preview") || document.querySelector("#preview");
-    const out = document.getElementById("output") || document.querySelector("#output");
-    const shareBtn = document.getElementById("btn-share") || document.querySelector("#btn-share");
-    const copyBtn = document.getElementById("btn-copy") || document.querySelector("#btn-copy");
-    const statusEl = document.getElementById("status") || document.querySelector("#status");
-    const statusText = document.getElementById("status-text") || document.querySelector("#status-text");
-    const spin = document.getElementById("spin") || document.querySelector("#spin");
+    // より広範囲で要素を検索
+    const recBtn = document.getElementById("btn-rec") || 
+                   document.querySelector("#btn-rec") || 
+                   document.querySelector("button[class*='btn-lg']") ||
+                   Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("録音開始"));
+    
+    const clrBtn = document.getElementById("btn-clear") || 
+                   document.querySelector("#btn-clear") || 
+                   Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("クリア"));
+    
+    const prv = document.getElementById("preview") || 
+                document.querySelector("#preview") || 
+                document.querySelector("ol[id='preview']");
+    
+    const out = document.getElementById("output") || 
+                document.querySelector("#output") || 
+                document.querySelector("textarea[id='output']");
+    
+    const shareBtn = document.getElementById("btn-share") || 
+                     document.querySelector("#btn-share") || 
+                     Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("共有"));
+    
+    const copyBtn = document.getElementById("btn-copy") || 
+                    document.querySelector("#btn-copy") || 
+                    Array.from(document.querySelectorAll("button")).find(btn => btn.textContent.includes("コピー"));
+    
+    const statusEl = document.getElementById("status") || 
+                     document.querySelector("#status") || 
+                     document.querySelector(".status");
+    
+    const statusText = document.getElementById("status-text") || 
+                       document.querySelector("#status-text");
+    
+    const spin = document.getElementById("spin") || 
+                 document.querySelector("#spin") || 
+                 document.querySelector(".spinner");
     
     console.log("要素の取得状況:");
     console.log("recBtn:", recBtn);

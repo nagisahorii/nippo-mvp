@@ -181,6 +181,9 @@
 
   // DOMContentLoadedイベントで初期化
   const init = () => {
+    console.log("init開始");
+    console.log("document.readyState:", document.readyState);
+    
     const elements = getElements();
     recBtn = elements.recBtn;
     clrBtn = elements.clrBtn;
@@ -192,8 +195,13 @@
     statusText = elements.statusText;
     spin = elements.spin;
 
+    console.log("要素取得後の状態:");
+    console.log("recBtn:", recBtn);
+    console.log("clrBtn:", clrBtn);
+
     if (!recBtn) {
       console.error("録音ボタンが見つかりません");
+      console.log("document.getElementById('btn-rec'):", document.getElementById("btn-rec"));
       return;
     }
 
@@ -202,6 +210,15 @@
   };
 
   const setupEventHandlers = () => {
+    console.log("setupEventHandlers開始");
+    console.log("recBtn:", recBtn);
+    console.log("clrBtn:", clrBtn);
+    
+    if (!recBtn) {
+      console.error("recBtnがnullです！");
+      return;
+    }
+    
     recBtn.onclick = async ()=>{
       console.log("録音ボタンがクリックされました");
       console.log("sr:", sr);
@@ -251,6 +268,7 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    init();
+    // 少し遅延させて実行
+    setTimeout(init, 100);
   }
 })();

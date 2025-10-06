@@ -93,6 +93,18 @@
         console.log("録音ボタンを発見:", recBtn);
       } else {
         console.log("録音ボタンが見つかりませんでした");
+        
+        // kintone内での表示を確認
+        console.log("kintone内での表示を確認中...");
+        console.log("現在のURL:", window.location.href);
+        console.log("現在のドメイン:", window.location.hostname);
+        
+        // より直接的な検索
+        const buttons = document.querySelectorAll('button');
+        console.log("見つかったボタン数:", buttons.length);
+        buttons.forEach((btn, i) => {
+          console.log(`ボタン${i}: "${btn.textContent}" (id: ${btn.id})`);
+        });
       }
     }
     

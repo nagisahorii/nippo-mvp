@@ -1,6 +1,6 @@
 // voice.js
 (() => {
-  const API_BASE = "https://nippo-mvp-mlye.vercel.app";
+  const API_BASE = "https://nippo-mvp-mlye-ealwetn42-nagisa-horiis-projects.vercel.app";
   const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;

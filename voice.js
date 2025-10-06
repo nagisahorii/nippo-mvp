@@ -17,6 +17,36 @@
     console.log("document.querySelectorAll('button'):", document.querySelectorAll('button'));
     console.log("document.querySelectorAll('[id]'):", document.querySelectorAll('[id]'));
     
+    // すべてのボタンを詳細に調査
+    const allButtons = document.querySelectorAll('button');
+    console.log("すべてのボタン:", allButtons);
+    allButtons.forEach((btn, index) => {
+      console.log(`ボタン${index}:`, btn);
+      console.log(`  - id: ${btn.id}`);
+      console.log(`  - class: ${btn.className}`);
+      console.log(`  - text: ${btn.textContent}`);
+    });
+    
+    // kintone内のiframeの可能性を確認
+    console.log("window.parent:", window.parent);
+    console.log("window.parent === window:", window.parent === window);
+    
+    // 親フレームの要素も確認
+    if (window.parent !== window) {
+      try {
+        const parentButtons = window.parent.document.querySelectorAll('button');
+        console.log("親フレームのボタン:", parentButtons);
+        parentButtons.forEach((btn, index) => {
+          console.log(`親ボタン${index}:`, btn);
+          console.log(`  - id: ${btn.id}`);
+          console.log(`  - class: ${btn.className}`);
+          console.log(`  - text: ${btn.textContent}`);
+        });
+      } catch (e) {
+        console.log("親フレームへのアクセスエラー:", e);
+      }
+    }
+    
     // より広範囲で要素を検索
     const recBtn = document.getElementById("btn-rec") || 
                    document.querySelector("#btn-rec") || 

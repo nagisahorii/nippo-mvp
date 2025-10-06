@@ -3,8 +3,6 @@
   console.log("voice.js開始");
   console.log("document.readyState:", document.readyState);
   
-  const API_BASE = "https://nippo-mvp-mlye-p3x9d8a4d-nagisa-horiis-projects.vercel.app";
-  const API_PATH = "/api/format";
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   console.log("SR:", SR);
@@ -166,74 +164,15 @@
   };
 
   const convertNow = async () => {
-    if (buffer.length === 0) { setStatus("変換するテキストがありません"); setBusy(false); return; }
+    if (buffer.length === 0) { setStatus("録音されたテキストがありません"); setBusy(false); return; }
     const text = buffer.join(" ");
-    try {
-      // まずVercelのAPIを試行
-      const res = await fetch(`${API_BASE}${API_PATH}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (out) out.value = data.text || data.result || "変換に失敗しました";
-      setStatus("変換完了！", "ok");
-    } catch (e) {
-      console.error("API変換エラー:", e);
-      console.log("フォールバック変換を実行中...");
-      
-      // フォールバック: デモ変換
-      try {
-        const demoResult = getDemoResult(text);
-        if (out) out.value = demoResult.text;
-        setStatus("変換完了（デモ版）！", "ok");
-      } catch (demoError) {
-        console.error("デモ変換エラー:", demoError);
-        setStatus(`変換エラー: ${e.message}`, "err");
-      }
-    }
+    
+    // 録音したテキストをそのまま表示
+    if (out) out.value = text;
+    setStatus("録音完了！", "ok");
     setBusy(false);
   };
 
-  // デモ用の変換結果（実際のAPIが使えない場合のフォールバック）
-  const getDemoResult = (text) => {
-    // 簡単なデモ変換
-    const lines = text.split('\n').filter(line => line.trim());
-    let result = '';
-    
-    if (text.includes('非成約') || text.includes('断られた') || text.includes('遠い')) {
-      result = `【体験番号 ⇨ 非成約】
-【年齢】—
-【仕事】—
-【運動歴】—
-【顕在ニーズ】—
-【潜在ニーズ/インサイト】—
-【自分が決めた方向性やテーマ】—
-【感動ポイントと反応】—
-【どんな教育（知識共有）を入れたか】—
-【何と言われて断られたか】駅から遠いため
-【断られた返し】—
-【👍 good】—
-【↕️ more】—
-【自由記載欄】—`;
-    } else {
-      result = `【体験番号 ⇨ 成約】
-【年齢】—
-【仕事】—
-【運動歴】—
-【顕在ニーズ】—
-【潜在ニーズ/インサイト】—
-【自分が決めた方向性やテーマ】—
-【感動ポイントと反応】—
-【どんな教育（知識共有）を入れたか】—
-【👍 good】—
-【↕️ more】—
-【自由記載欄】—`;
-    }
-    
-    return { text: result, outcome: text.includes('非成約') ? '非成約' : '成約' };
-  };
 
   const shareText = async (text) => {
     // Web Share API が利用可能な場合

@@ -297,8 +297,29 @@
     }
   };
 
+  // kintoneアクセス権限チェック
+  const checkKintoneAccess = async () => {
+    try {
+      const res = await fetch(`${API_BASE}${API_PATH}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      if (res.status === 403) {
+        const data = await res.json();
+        console.log("kintone外からのアクセス検出:", data);
+        return false;
+      }
+      
+      return true;
+    } catch (e) {
+      console.log("アクセス権限チェックエラー:", e);
+      return false;
+    }
+  };
+
   // DOMContentLoadedイベントで初期化
-  const init = () => {
+  const init = async () => {
     console.log("init開始");
     console.log("document.readyState:", document.readyState);
     
@@ -312,6 +333,22 @@
     statusEl = elements.statusEl;
     statusText = elements.statusText;
     spin = elements.spin;
+
+    // kintoneアクセス権限をチェック
+    const hasAccess = await checkKintoneAccess();
+    if (!hasAccess) {
+      if (statusEl) {
+        statusEl.innerHTML = '<span style="color: #dc2626; font-weight: bold;">⚠️ kintoneアプリからご利用ください</span>';
+        statusEl.style.display = "block";
+      }
+      if (recBtn) {
+        recBtn.disabled = true;
+        recBtn.textContent = "⚠️ kintone外からは利用できません";
+        recBtn.style.background = "#ef4444";
+        recBtn.style.color = "white";
+      }
+      return;
+    }
 
     console.log("要素取得後の状態:");
     console.log("recBtn:", recBtn);

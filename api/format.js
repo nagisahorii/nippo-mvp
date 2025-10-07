@@ -100,6 +100,14 @@ export default async function handler(req, res) {
 
   // kintoneドメイン制限チェック
   const referer = req.headers.referer || req.headers.origin;
+  const userAgent = req.headers['user-agent'] || '';
+  
+  console.log("デバッグ情報:");
+  console.log("- referer:", referer);
+  console.log("- origin:", req.headers.origin);
+  console.log("- user-agent:", userAgent);
+  console.log("- 全ヘッダー:", req.headers);
+  
   const allowedDomains = [
     'https://9n4qfk7h8xgy.cybozu.com',
     'https://9n4qfk7h8xgy.cybozu.com/',
@@ -114,7 +122,12 @@ export default async function handler(req, res) {
     console.log("アクセス拒否:", referer);
     return res.status(403).json({ 
       error: "kintoneアプリからご利用ください",
-      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
+      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/",
+      debug: {
+        referer: referer,
+        origin: req.headers.origin,
+        userAgent: userAgent
+      }
     });
   }
 

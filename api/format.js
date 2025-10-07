@@ -98,8 +98,27 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // 認証を完全に無効化
-  console.log("API呼び出し:", req.method, req.url);
+  // kintoneドメイン制限チェック
+  const referer = req.headers.referer || req.headers.origin;
+  const allowedDomains = [
+    'https://9n4qfk7h8xgy.cybozu.com',
+    'https://9n4qfk7h8xgy.cybozu.com/',
+    'https://9n4qfk7h8xgy.cybozu.com/k/379/'
+  ];
+  
+  const isAllowedDomain = allowedDomains.some(domain => 
+    referer && referer.startsWith(domain)
+  );
+  
+  if (!isAllowedDomain) {
+    console.log("アクセス拒否:", referer);
+    return res.status(403).json({ 
+      error: "kintoneアプリからご利用ください",
+      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
+    });
+  }
+
+  console.log("API呼び出し:", req.method, req.url, "from:", referer);
   
   if (req.method === "GET") {
     return res.status(200).json({ ok: true, route: "/api/format" });

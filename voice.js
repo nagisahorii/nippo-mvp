@@ -184,6 +184,13 @@
       setStatus("変換完了！", "ok");
     } catch (e) {
       console.error("API変換エラー:", e);
+      
+      // 403エラーの場合はkintoneアプリからのアクセスを促す
+      if (e.message.includes("403")) {
+        setStatus("kintoneアプリからご利用ください", "err");
+        return;
+      }
+      
       console.log("フォールバック変換を実行中...");
       
       // フォールバック: クライアントサイド変換

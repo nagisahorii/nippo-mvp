@@ -175,7 +175,7 @@
       const res = await fetch(`${API_BASE}${API_PATH}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ raw: text })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();

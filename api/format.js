@@ -115,20 +115,30 @@ export default async function handler(req, res) {
     '9n4qfk7h8xgy.cybozu.com'  // プロトコルなしでも許可
   ];
   
-  const isAllowedDomain = allowedDomains.some(domain => 
-    (referer && referer.includes(domain)) || 
-    (userAgent && userAgent.includes('kintone'))
+  // User-Agentベースの制限（より確実）
+  const isKintoneUserAgent = userAgent && (
+    userAgent.includes('kintone') || 
+    userAgent.includes('Cybozu') ||
+    userAgent.includes('cybozu')
   );
   
-  // 一時的に制限を緩和（デバッグ用）
+  const isAllowedDomain = allowedDomains.some(domain => 
+    (referer && referer.includes(domain)) || 
+    isKintoneUserAgent
+  );
+  
   if (!isAllowedDomain) {
-    console.log("アクセス拒否:", referer);
-    console.log("デバッグ情報 - referer:", referer);
-    console.log("デバッグ情報 - origin:", req.headers.origin);
-    console.log("デバッグ情報 - userAgent:", userAgent);
+    console.log("アクセス拒否:", {
+      referer: referer,
+      origin: req.headers.origin,
+      userAgent: userAgent,
+      isKintoneUserAgent: isKintoneUserAgent
+    });
     
-    // 一時的に許可（デバッグ用）
-    console.log("⚠️ 一時的にアクセスを許可（デバッグ用）");
+    return res.status(403).json({ 
+      error: "kintoneアプリからご利用ください",
+      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
+    });
   }
 
   console.log("API呼び出し:", req.method, req.url, "from:", referer);

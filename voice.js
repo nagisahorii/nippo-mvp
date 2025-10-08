@@ -282,8 +282,8 @@
       try {
         const shareData = {
           text: text,
-          title: '日報',
-          url: window.location.href
+          title: '日報'
+          // URLは含めない（テキストのみ共有）
         };
         
         if (navigator.canShare && navigator.canShare(shareData)) {

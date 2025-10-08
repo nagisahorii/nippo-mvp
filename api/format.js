@@ -127,18 +127,17 @@ export default async function handler(req, res) {
     isKintoneUserAgent
   );
   
+  // 一時的に制限を無効化（kintone内で動作させるため）
   if (!isAllowedDomain) {
-    console.log("アクセス拒否:", {
+    console.log("制限対象のアクセス:", {
       referer: referer,
       origin: req.headers.origin,
       userAgent: userAgent,
       isKintoneUserAgent: isKintoneUserAgent
     });
     
-    return res.status(403).json({ 
-      error: "kintoneアプリからご利用ください",
-      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
-    });
+    // 一時的に許可（kintone内で動作させるため）
+    console.log("⚠️ 一時的にアクセスを許可（kintone内動作のため）");
   }
 
   console.log("API呼び出し:", req.method, req.url, "from:", referer);

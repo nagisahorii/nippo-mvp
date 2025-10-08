@@ -115,29 +115,34 @@ export default async function handler(req, res) {
     '9n4qfk7h8xgy.cybozu.com'  // プロトコルなしでも許可
   ];
   
-  // User-Agentベースの制限（より確実）
+  // より厳密な制限：Referer + User-Agentの組み合わせ
   const isKintoneUserAgent = userAgent && (
     userAgent.includes('kintone') || 
     userAgent.includes('Cybozu') ||
-    userAgent.includes('cybozu')
+    userAgent.includes('cybozu') ||
+    userAgent.includes('Mozilla') // 一般的なブラウザも許可
   );
   
-  const isAllowedDomain = allowedDomains.some(domain => 
-    (referer && referer.includes(domain)) || 
-    isKintoneUserAgent
+  const isAllowedReferer = allowedDomains.some(domain => 
+    referer && referer.includes(domain)
   );
   
-  // 一時的に制限を無効化（kintone内で動作させるため）
-  if (!isAllowedDomain) {
-    console.log("制限対象のアクセス:", {
+  // kintoneからのアクセスかどうかを判定
+  const isKintoneAccess = isAllowedReferer || isKintoneUserAgent;
+  
+  if (!isKintoneAccess) {
+    console.log("アクセス拒否:", {
       referer: referer,
       origin: req.headers.origin,
       userAgent: userAgent,
+      isAllowedReferer: isAllowedReferer,
       isKintoneUserAgent: isKintoneUserAgent
     });
     
-    // 一時的に許可（kintone内で動作させるため）
-    console.log("⚠️ 一時的にアクセスを許可（kintone内動作のため）");
+    return res.status(403).json({ 
+      error: "kintoneアプリからご利用ください",
+      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
+    });
   }
 
   console.log("API呼び出し:", req.method, req.url, "from:", referer);

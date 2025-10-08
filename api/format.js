@@ -119,8 +119,7 @@ export default async function handler(req, res) {
   const isKintoneUserAgent = userAgent && (
     userAgent.includes('kintone') || 
     userAgent.includes('Cybozu') ||
-    userAgent.includes('cybozu') ||
-    userAgent.includes('Mozilla') // 一般的なブラウザも許可
+    userAgent.includes('cybozu')
   );
   
   const isAllowedReferer = allowedDomains.some(domain => 

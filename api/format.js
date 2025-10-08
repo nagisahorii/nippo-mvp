@@ -134,19 +134,14 @@ export default async function handler(req, res) {
   // kintoneからのアクセスかどうかを判定（Refererのみ）
   const isKintoneAccess = isAllowedReferer;
   
-  // kintone外のアクセスを制限
+  // 一時的にアクセス制限を完全に緩和（kintone内での動作を優先）
   if (!isKintoneAccess) {
-    console.log("制限対象のアクセス:", {
+    console.log("⚠️ kintone外からのアクセス（一時的に許可）:", {
       referer: referer,
       origin: req.headers.origin,
-      userAgent: userAgent,
-      isAllowedReferer: isAllowedReferer
+      userAgent: userAgent
     });
-    
-    return res.status(403).json({ 
-      error: "kintoneアプリからご利用ください",
-      url: "https://9n4qfk7h8xgy.cybozu.com/k/379/"
-    });
+    // アクセス制限を一時的に解除（エラーを返さない）
   }
 
   console.log("API呼び出し:", req.method, req.url, "from:", referer);

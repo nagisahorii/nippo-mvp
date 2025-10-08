@@ -323,7 +323,27 @@
     console.log("init開始");
     console.log("document.readyState:", document.readyState);
     
-    const elements = getElements();
+    // 要素取得を複数回試行（タイミング問題を解決）
+    let elements = null;
+    let retryCount = 0;
+    const maxRetries = 5;
+    
+    while (!elements && retryCount < maxRetries) {
+      elements = getElements();
+      if (!elements || !elements.recBtn) {
+        console.log(`要素取得リトライ ${retryCount + 1}/${maxRetries}`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retryCount++;
+      } else {
+        break;
+      }
+    }
+    
+    if (!elements || !elements.recBtn) {
+      console.error("要素の取得に失敗しました");
+      return;
+    }
+    
     recBtn = elements.recBtn;
     clrBtn = elements.clrBtn;
     prv = elements.prv;

@@ -115,18 +115,19 @@ export default async function handler(req, res) {
     '9n4qfk7h8xgy.cybozu.com'  // プロトコルなしでも許可
   ];
   
-  // より厳密な制限：Referer + User-Agentの組み合わせ
+  // kintone内で確実に動作するよう制限を緩和
   const isKintoneUserAgent = userAgent && (
     userAgent.includes('kintone') || 
     userAgent.includes('Cybozu') ||
-    userAgent.includes('cybozu')
+    userAgent.includes('cybozu') ||
+    userAgent.includes('Mozilla') // 一般的なブラウザも許可
   );
   
   const isAllowedReferer = allowedDomains.some(domain => 
     referer && referer.includes(domain)
   );
   
-  // kintoneからのアクセスかどうかを判定
+  // kintoneからのアクセスかどうかを判定（Referer優先）
   const isKintoneAccess = isAllowedReferer || isKintoneUserAgent;
   
   if (!isKintoneAccess) {

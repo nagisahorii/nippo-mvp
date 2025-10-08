@@ -401,10 +401,17 @@
       sr.lang = "ja-JP";
       
       sr.onresult = (e) => {
+        console.log("音声認識結果:", e);
         const results = Array.from(e.results);
         const latest = results[results.length - 1];
+        console.log("最新の結果:", latest);
+        console.log("isFinal:", latest.isFinal);
+        console.log("transcript:", latest[0].transcript);
+        
         if (latest.isFinal) {
           buffer.push(latest[0].transcript);
+          console.log("bufferに追加:", latest[0].transcript);
+          console.log("現在のbuffer:", buffer);
           if (prv) prv.innerHTML += `<li>${latest[0].transcript}</li>`;
         }
       };
@@ -481,6 +488,8 @@
           if (recBtn) recBtn.textContent="🎙️ 録音開始";
           setStatus("変換中…"); 
           setBusy(true);
+          console.log("録音停止時のbuffer:", buffer);
+          console.log("bufferの長さ:", buffer.length);
           endTimer = setTimeout(()=> convertNow(), 800); // 保険
         }
       };

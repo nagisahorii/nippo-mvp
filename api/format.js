@@ -115,10 +115,21 @@ export default async function handler(req, res) {
     '9n4qfk7h8xgy.cybozu.com'  // プロトコルなしでも許可
   ];
   
+  // デバッグ情報を詳細に出力
+  console.log("=== 詳細デバッグ情報 ===");
+  console.log("referer:", referer);
+  console.log("origin:", req.headers.origin);
+  console.log("userAgent:", userAgent);
+  console.log("allowedDomains:", allowedDomains);
+  
   // kintone外のみ制限：Refererベースの判定
-  const isAllowedReferer = allowedDomains.some(domain => 
-    referer && referer.includes(domain)
-  );
+  const isAllowedReferer = allowedDomains.some(domain => {
+    const match = referer && referer.includes(domain);
+    console.log(`domain: ${domain}, referer: ${referer}, match: ${match}`);
+    return match;
+  });
+  
+  console.log("isAllowedReferer:", isAllowedReferer);
   
   // kintoneからのアクセスかどうかを判定（Refererのみ）
   const isKintoneAccess = isAllowedReferer;

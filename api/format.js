@@ -159,9 +159,30 @@ export default async function handler(req, res) {
 
   try {
     let body = req.body;
-    if (typeof body === "string") { try { body = JSON.parse(body); } catch { body = {}; } }
-    const raw = (body?.raw || "").trim();
-    if (!raw) return res.status(400).json({ error: "raw is required" });
+    console.log("リクエストボディ（生）:", body);
+    console.log("リクエストボディの型:", typeof body);
+    
+    if (typeof body === "string") { 
+      try { 
+        body = JSON.parse(body); 
+        console.log("JSONパース後:", body);
+      } catch (e) { 
+        console.log("JSONパースエラー:", e);
+        body = {}; 
+      } 
+    }
+    
+    console.log("最終的なbody:", body);
+    console.log("body.raw:", body?.raw);
+    console.log("body.text:", body?.text);
+    
+    const raw = (body?.raw || body?.text || "").trim();
+    console.log("抽出されたraw:", raw);
+    
+    if (!raw) {
+      console.log("rawが空のため400エラーを返す");
+      return res.status(400).json({ error: "raw is required" });
+    }
 
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ error: "OpenAI API key not configured" });

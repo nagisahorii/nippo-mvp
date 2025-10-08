@@ -181,7 +181,12 @@ export default async function handler(req, res) {
     
     if (!raw) {
       console.log("rawが空のため400エラーを返す");
-      return res.status(400).json({ error: "raw is required" });
+      console.log("利用可能なキー:", Object.keys(body || {}));
+      return res.status(400).json({ 
+        error: "raw is required", 
+        availableKeys: Object.keys(body || {}),
+        body: body 
+      });
     }
 
     if (!process.env.OPENAI_API_KEY) {

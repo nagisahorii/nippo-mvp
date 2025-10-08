@@ -172,12 +172,25 @@
     
     // まずVercelのAPIを試行
     try {
+      const requestBody = { raw: text };
+      console.log("送信するリクエストボディ:", requestBody);
+      console.log("送信先URL:", `${API_BASE}${API_PATH}`);
+      
       const res = await fetch(`${API_BASE}${API_PATH}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ raw: text })
+        body: JSON.stringify(requestBody)
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      console.log("レスポンスステータス:", res.status);
+      console.log("レスポンスOK:", res.ok);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.log("エラーレスポンス:", errorText);
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+      
       const data = await res.json();
       console.log("APIレスポンス:", data);
       if (out) out.value = data.text || "変換に失敗しました";

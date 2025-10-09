@@ -196,21 +196,27 @@
       if (out) out.value = data.text || "変換に失敗しました";
       setStatus("変換完了！", "ok");
     } catch (e) {
-      console.error("API変換エラー:", e);
+      console.error("API変換エラー（詳細）:", {
+        message: e.message,
+        stack: e.stack,
+        error: e
+      });
       
       // 403エラーの場合はkintoneアプリからのアクセスを促す
       if (e.message.includes("403")) {
         setStatus("kintoneアプリからご利用ください", "err");
+        if (out) out.value = "⚠️ kintoneアプリからご利用ください";
         return;
       }
       
-      console.log("フォールバック変換を実行中...");
+      console.log("⚠️ フォールバック変換を実行中...");
+      console.log("フォールバック理由:", e.message);
       
       // フォールバック: クライアントサイド変換
       try {
         const result = convertTextToReport(text);
         if (out) out.value = result;
-        setStatus("変換完了（フォールバック）！", "ok");
+        setStatus("⚠️ 変換完了（フォールバック）", "ok");
       } catch (fallbackError) {
         console.error("フォールバック変換エラー:", fallbackError);
         setStatus(`変換エラー: ${e.message}`, "err");

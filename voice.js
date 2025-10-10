@@ -167,13 +167,24 @@
   };
 
   const convertNow = async () => {
-    if (buffer.length === 0) { 
-      setStatus("変換するテキストがありません"); 
-      setBusy(false); 
-      return; 
+    console.log("=== convertNow開始 ===");
+    console.log("buffer.length:", buffer.length);
+    console.log("buffer:", buffer);
+    
+    // フォールバック: bufferが空の場合、prvから取得を試みる
+    let text = "";
+    if (buffer.length > 0) {
+      text = buffer.join(" ").trim();
+      console.log("bufferからテキスト取得:", text);
+    } else if (prv && prv.children.length > 0) {
+      // prvのリストアイテムからテキストを取得
+      const prvTexts = Array.from(prv.children).map(li => li.textContent.trim());
+      text = prvTexts.join(" ").trim();
+      console.log("⚠️ bufferが空のため、prvからテキスト取得:", text);
+      console.log("prvから取得した項目数:", prvTexts.length);
     }
-    const text = buffer.join(" ").trim();
-    console.log("変換開始:", text);
+    
+    console.log("最終テキスト:", text);
     console.log("テキストの長さ:", text.length);
     
     if (!text || text.length === 0) {

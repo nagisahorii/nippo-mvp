@@ -150,7 +150,7 @@
   
   let sr = null, on = false, buffer = [];
   let endTimer = null;
-  let lastProcessedResultIndex = 0; // 最後に処理した結果のインデックス
+  let processedResults = new Set(); // 処理済み結果のハッシュを記録
   let recBtn, clrBtn, prv, out, shareBtn, copyBtn, statusEl, statusText, spin;
 
   const setStatus = (msg, type = "hint") => {
@@ -420,38 +420,36 @@
       sr.maxAlternatives = 1; // 最も確度の高い結果のみ取得
       
       sr.onresult = (e) => {
-        console.log("音声認識結果 onresult発火");
-        console.log("resultIndex:", e.resultIndex, "results.length:", e.results.length);
-        console.log("lastProcessedResultIndex:", lastProcessedResultIndex);
+        console.log("🎤 onresult発火 - resultIndex:", e.resultIndex, "results.length:", e.results.length);
         
-        // すべての結果を処理（再起動時も漏れなく）
-        for (let i = 0; i < e.results.length; i++) {
+        // resultIndexから処理（これが新しい結果の開始位置）
+        for (let i = e.resultIndex; i < e.results.length; i++) {
           const result = e.results[i];
+          const transcript = result[0].transcript;
           
-          // 確定結果のみ処理
           if (result.isFinal) {
-            // まだ処理していない結果のみ
-            if (i >= lastProcessedResultIndex) {
-              const transcript = result[0].transcript;
-              console.log(`✅ 結果[${i}] 処理:`, transcript);
+            // 確定結果の一意のハッシュを作成（内容+インデックス）
+            const resultHash = `${i}-${transcript}`;
+            
+            if (!processedResults.has(resultHash)) {
+              console.log(`✅ 結果[${i}] 新規処理:`, transcript);
               const trimmed = transcript.trim();
               
               if (trimmed) {
                 buffer.push(trimmed);
+                processedResults.add(resultHash);
                 console.log("bufferに追加:", trimmed);
-                console.log("現在のbuffer:", buffer);
+                console.log("現在のbuffer長:", buffer.length);
                 if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
-                lastProcessedResultIndex = i + 1; // 次回はこのインデックス以降を処理
-                console.log("lastProcessedResultIndex更新:", lastProcessedResultIndex);
               } else {
                 console.log("⚠️ 空のテキストのためスキップ");
               }
             } else {
-              console.log(`⏭️ 結果[${i}] スキップ（処理済み）:`, result[0].transcript);
+              console.log(`⏭️ 結果[${i}] 重複スキップ:`, transcript);
             }
           } else {
-            // 暫定結果もログ出力（デバッグ用）
-            console.log(`📝 暫定結果[${i}]:`, result[0].transcript);
+            // 暫定結果（リアルタイム表示用）
+            console.log(`📝 暫定[${i}]:`, transcript);
           }
         }
       };
@@ -470,18 +468,16 @@
               return;
             }
             try {
-              lastProcessedResultIndex = 0; // 再起動時はインデックスをリセット
               sr.start();
-              console.log("✅ 音声認識を再起動しました（インデックスをリセット）");
+              console.log("✅ 音声認識を再起動しました");
             } catch (e) {
               console.error("❌ 音声認識の再起動に失敗:", e);
               // 再起動に失敗した場合、もう一度試す
               setTimeout(() => {
                 if (!on) return;
                 try {
-                  lastProcessedResultIndex = 0; // 再起動時はインデックスをリセット
                   sr.start();
-                  console.log("✅ 音声認識を再起動しました（2回目、インデックスをリセット）");
+                  console.log("✅ 音声認識を再起動しました（2回目）");
                 } catch (e2) {
                   console.error("❌ 音声認識の再起動に失敗（2回目）:", e2);
                   on = false;
@@ -560,14 +556,14 @@
             return;
           }
           buffer=[]; 
-          lastProcessedResultIndex = 0; // インデックスをリセット
+          processedResults.clear(); // 処理済み結果をクリア
           if (prv) prv.innerHTML="";
           try{ 
             sr.start(); 
             on=true; 
             if (recBtn) recBtn.textContent="■ 停止"; 
             setStatus("録音中…"); 
-            console.log("🎙️ 録音開始 - bufferとインデックスをリセット");
+            console.log("🎙️ 録音開始 - buffer と processedResults をクリア");
           }
           catch{ 
             setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); 

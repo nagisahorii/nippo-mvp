@@ -416,6 +416,7 @@
       sr.continuous = true;
       sr.interimResults = true;
       sr.lang = "ja-JP";
+      sr.maxAlternatives = 1; // 最も確度の高い結果のみ取得
       
       sr.onresult = (e) => {
         console.log("音声認識結果:", e);
@@ -441,24 +442,52 @@
       };
       
       sr.onend = () => {
+        console.log("sr.onend 発火, on:", on);
+        // ユーザーが明示的に停止していない場合は再起動
         if (on) {
-          on = false;
-          if (recBtn) recBtn.textContent = "🎙️ 録音開始";
-          setStatus("変換中…");
-          setBusy(true);
-          convertNow();
+          console.log("⚠️ 音声認識が予期せず終了したため再起動します");
+          try {
+            sr.start();
+            console.log("音声認識を再起動しました");
+          } catch (e) {
+            console.error("音声認識の再起動に失敗:", e);
+            // 再起動に失敗した場合のみ停止
+            on = false;
+            if (recBtn) recBtn.textContent = "🎙️ 録音開始";
+            setStatus("音声認識が停止しました。もう一度お試しください。", "err");
+          }
         }
       };
       
       sr.onerror = (e) => {
+        console.log("音声認識エラー:", e.error);
+        
+        // no-speechエラーは無視（無音時に発生するが、継続して認識したい）
+        if (e.error === "no-speech") {
+          console.log("無音検出 - 認識を継続します");
+          return;
+        }
+        
+        // abortedエラーも無視（再起動時に発生することがある）
+        if (e.error === "aborted") {
+          console.log("認識が中断されました - 再起動で対応します");
+          return;
+        }
+        
         const map = {
-          "no-speech": "音声が検出されませんでした。もう一度お試しください。",
           "audio-capture": "マイクにアクセスできません。",
           "not-allowed": "マイクの使用が許可されていません。",
-          "aborted": "認識が中断されました。再試行してください。",
           "network": "ネットワークエラー。通信を確認してください。"
         };
-        setStatus(map[e.error] || `音声認識エラー: ${e.error||"unknown"}`, "err");
+        
+        // 深刻なエラーの場合は停止
+        if (map[e.error]) {
+          on = false;
+          if (recBtn) recBtn.textContent = "🎙️ 録音開始";
+          setStatus(map[e.error], "err");
+        } else {
+          console.log("その他のエラー:", e.error, "- 認識を継続します");
+        }
       };
     } else {
       setStatus("このブラウザは音声入力に対応していません（PCのChrome/Edge推奨）", "err");
@@ -507,14 +536,16 @@
             setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); 
           }
         }else{
-          try{ sr.stop(); }catch{}
+          // 先にonフラグをfalseにしてから停止（onendでの再起動を防ぐ）
           on=false; 
+          try{ sr.stop(); }catch{}
           if (recBtn) recBtn.textContent="🎙️ 録音開始";
           setStatus("変換中…"); 
           setBusy(true);
           console.log("録音停止時のbuffer:", buffer);
           console.log("bufferの長さ:", buffer.length);
-          endTimer = setTimeout(()=> convertNow(), 800); // 保険
+          // 変換処理を実行
+          convertNow();
         }
       };
 

@@ -150,6 +150,7 @@
   
   let sr = null, on = false, buffer = [];
   let endTimer = null;
+  let lastProcessedResultIndex = 0; // 最後に処理した結果のインデックス
   let recBtn, clrBtn, prv, out, shareBtn, copyBtn, statusEl, statusText, spin;
 
   const setStatus = (msg, type = "hint") => {
@@ -419,31 +420,38 @@
       sr.maxAlternatives = 1; // 最も確度の高い結果のみ取得
       
       sr.onresult = (e) => {
-        console.log("音声認識結果:", e);
+        console.log("音声認識結果 onresult発火");
         console.log("resultIndex:", e.resultIndex, "results.length:", e.results.length);
+        console.log("lastProcessedResultIndex:", lastProcessedResultIndex);
         
-        // resultIndexから最後まで、すべての確定結果を処理
-        // これにより、再起動時にもデータが失われない
-        for (let i = e.resultIndex; i < e.results.length; i++) {
+        // すべての結果を処理（再起動時も漏れなく）
+        for (let i = 0; i < e.results.length; i++) {
           const result = e.results[i];
-          console.log(`結果[${i}]:`, result, "isFinal:", result.isFinal);
           
+          // 確定結果のみ処理
           if (result.isFinal) {
-            const transcript = result[0].transcript;
-            console.log("transcript:", transcript);
-            const trimmed = transcript.trim();
-            
-            if (trimmed) {
-              buffer.push(trimmed);
-              console.log("bufferに追加:", trimmed);
-              console.log("現在のbuffer:", buffer);
-              if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+            // まだ処理していない結果のみ
+            if (i >= lastProcessedResultIndex) {
+              const transcript = result[0].transcript;
+              console.log(`✅ 結果[${i}] 処理:`, transcript);
+              const trimmed = transcript.trim();
+              
+              if (trimmed) {
+                buffer.push(trimmed);
+                console.log("bufferに追加:", trimmed);
+                console.log("現在のbuffer:", buffer);
+                if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+                lastProcessedResultIndex = i + 1; // 次回はこのインデックス以降を処理
+                console.log("lastProcessedResultIndex更新:", lastProcessedResultIndex);
+              } else {
+                console.log("⚠️ 空のテキストのためスキップ");
+              }
             } else {
-              console.log("⚠️ 空のテキストのためスキップ");
+              console.log(`⏭️ 結果[${i}] スキップ（処理済み）:`, result[0].transcript);
             }
           } else {
             // 暫定結果もログ出力（デバッグ用）
-            console.log("暫定結果:", result[0].transcript);
+            console.log(`📝 暫定結果[${i}]:`, result[0].transcript);
           }
         }
       };
@@ -550,12 +558,14 @@
             return;
           }
           buffer=[]; 
+          lastProcessedResultIndex = 0; // インデックスをリセット
           if (prv) prv.innerHTML="";
           try{ 
             sr.start(); 
             on=true; 
             if (recBtn) recBtn.textContent="■ 停止"; 
             setStatus("録音中…"); 
+            console.log("🎙️ 録音開始 - bufferとインデックスをリセット");
           }
           catch{ 
             setStatus("録音開始に失敗しました。タブをアクティブにして再試行してください。","err"); 

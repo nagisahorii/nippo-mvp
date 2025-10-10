@@ -166,9 +166,20 @@
   };
 
   const convertNow = async () => {
-    if (buffer.length === 0) { setStatus("変換するテキストがありません"); setBusy(false); return; }
-    const text = buffer.join(" ");
+    if (buffer.length === 0) { 
+      setStatus("変換するテキストがありません"); 
+      setBusy(false); 
+      return; 
+    }
+    const text = buffer.join(" ").trim();
     console.log("変換開始:", text);
+    console.log("テキストの長さ:", text.length);
+    
+    if (!text || text.length === 0) {
+      setStatus("⚠️ 音声が認識されませんでした。もう一度お試しください。", "err");
+      setBusy(false);
+      return;
+    }
     
     // まずVercelのAPIを試行
     try {
@@ -412,13 +423,20 @@
         const latest = results[results.length - 1];
         console.log("最新の結果:", latest);
         console.log("isFinal:", latest.isFinal);
-        console.log("transcript:", latest[0].transcript);
+        const transcript = latest[0].transcript;
+        console.log("transcript:", transcript);
+        console.log("transcript.trim():", transcript.trim());
         
         if (latest.isFinal) {
-          buffer.push(latest[0].transcript);
-          console.log("bufferに追加:", latest[0].transcript);
-          console.log("現在のbuffer:", buffer);
-          if (prv) prv.innerHTML += `<li>${latest[0].transcript}</li>`;
+          const trimmed = transcript.trim();
+          if (trimmed) { // 空文字列をフィルタリング
+            buffer.push(trimmed);
+            console.log("bufferに追加:", trimmed);
+            console.log("現在のbuffer:", buffer);
+            if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+          } else {
+            console.log("⚠️ 空のテキストのためスキップ");
+          }
         }
       };
       

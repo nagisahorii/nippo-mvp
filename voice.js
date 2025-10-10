@@ -420,38 +420,44 @@
       sr.maxAlternatives = 1; // 最も確度の高い結果のみ取得
       
       sr.onresult = (e) => {
-        console.log("🎤 onresult発火 - resultIndex:", e.resultIndex, "results.length:", e.results.length);
+        console.log("🎤 onresult発火");
+        console.log("  resultIndex:", e.resultIndex);
+        console.log("  results.length:", e.results.length);
+        console.log("  processedResults.size:", processedResults.size);
         
         // resultIndexから処理（これが新しい結果の開始位置）
         for (let i = e.resultIndex; i < e.results.length; i++) {
           const result = e.results[i];
           const transcript = result[0].transcript;
+          const isFinal = result.isFinal;
           
-          if (result.isFinal) {
-            // 確定結果の一意のハッシュを作成（内容+インデックス）
-            const resultHash = `${i}-${transcript}`;
+          console.log(`  結果[${i}] isFinal:${isFinal} transcript:"${transcript}"`);
+          
+          if (isFinal) {
+            const trimmed = transcript.trim();
             
-            if (!processedResults.has(resultHash)) {
-              console.log(`✅ 結果[${i}] 新規処理:`, transcript);
-              const trimmed = transcript.trim();
-              
-              if (trimmed) {
-                buffer.push(trimmed);
-                processedResults.add(resultHash);
-                console.log("bufferに追加:", trimmed);
-                console.log("現在のbuffer長:", buffer.length);
-                if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
-              } else {
-                console.log("⚠️ 空のテキストのためスキップ");
-              }
-            } else {
-              console.log(`⏭️ 結果[${i}] 重複スキップ:`, transcript);
+            if (!trimmed) {
+              console.log(`  ⚠️ 結果[${i}] 空のテキストのためスキップ`);
+              continue;
             }
-          } else {
-            // 暫定結果（リアルタイム表示用）
-            console.log(`📝 暫定[${i}]:`, transcript);
+            
+            // タイムスタンプを含むハッシュで重複を確実に防止
+            const resultHash = `${i}-${trimmed}-${Date.now()}`;
+            
+            if (!processedResults.has(trimmed)) {
+              console.log(`  ✅ 結果[${i}] 新規処理: "${trimmed}"`);
+              buffer.push(trimmed);
+              processedResults.add(trimmed); // テキスト自体で重複チェック
+              console.log(`  bufferに追加完了 - 現在のbuffer長:${buffer.length}`);
+              console.log(`  現在のbuffer:`, buffer);
+              if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+            } else {
+              console.log(`  ⏭️ 結果[${i}] 重複スキップ: "${trimmed}"`);
+            }
           }
         }
+        
+        console.log(`🎤 onresult終了 - 最終buffer長:${buffer.length}`);
       };
       
       sr.onend = () => {

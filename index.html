@@ -223,27 +223,22 @@
   </div>
 
   <script>
-    // PC表示かどうかを検出（親ウィンドウまたは実際の表示幅で判断）
+    // PC表示かどうかを検出
     (function() {
-      try {
-        // 親ウィンドウが存在する場合（iframe内）は親の幅を使用
-        const displayWidth = window.parent !== window ? window.parent.innerWidth : window.innerWidth;
-        console.log('[PC判定] 表示幅:', displayWidth);
-        
-        // 800px以上ならPC表示とみなす
-        if (displayWidth >= 800) {
-          document.body.classList.add('pc-view');
-          console.log('[PC判定] PC表示モードを適用');
-        } else {
-          console.log('[PC判定] モバイル表示モードを維持');
-        }
-      } catch (e) {
-        // クロスオリジンでアクセスできない場合は、スクリーンサイズで判断
-        console.log('[PC判定] 親ウィンドウにアクセス不可、screen.widthで判定:', screen.width);
-        if (screen.width >= 800) {
-          document.body.classList.add('pc-view');
-          console.log('[PC判定] PC表示モードを適用（screen.width基準）');
-        }
+      // モバイルデバイスかどうかをUser-Agentとタッチ機能で判定
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                          || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
+      
+      console.log('[PC判定] User-Agent:', navigator.userAgent);
+      console.log('[PC判定] タッチポイント数:', navigator.maxTouchPoints);
+      console.log('[PC判定] モバイルデバイス判定:', isMobileDevice);
+      
+      // モバイルデバイスでなければPC表示モードを適用
+      if (!isMobileDevice) {
+        document.body.classList.add('pc-view');
+        console.log('[PC判定] PC表示モードを適用');
+      } else {
+        console.log('[PC判定] モバイル表示モードを維持');
       }
     })();
   </script>

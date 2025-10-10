@@ -56,25 +56,19 @@
 
     button{border:1px solid var(--border); border-radius:12px; background:#fff; color:var(--fg); font-weight:800; cursor:pointer;}
     
-    /* PC表示時のスタイル - 文字サイズを通常サイズに */
-    /* body.pc-view クラスで制御（JavaScriptで親ウィンドウの幅を検出して追加） */
-    body.pc-view .wrap{padding:16px 12px; max-width: 720px; margin: 0 auto;}
-    body.pc-view header{font-size:20px; padding:16px 0; font-weight: 800; text-align: center;}
-    body.pc-view .btn-lg{width:100%; font-size:18px; padding:16px 20px; min-height: 56px; font-weight: 800; border-radius: 12px; background:#1e3a8a; color:#fff; border:1px solid #1e3a8a;}
-    body.pc-view .btn-ghost{background:transparent; color:#64748b; font-size:14px; padding:12px 16px; min-height: 44px; border-radius: 8px; border:1px solid transparent;}
-    body.pc-view .guide-container{margin:12px 0; padding:16px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;}
-    body.pc-view .guide-title{font-size:18px; font-weight:800; color:#1f2937; text-align:center; margin-bottom:12px;}
-    body.pc-view .guide-item{flex:1; font-size:14px; padding:12px 14px; background:#fff; 
-                border-radius:8px; text-align:center; font-weight:600; color:#374151;
-                border:1px solid #d1d5db;}
-    body.pc-view textarea#output{min-height:400px; font-size:16px; padding:20px; border-radius: 12px; line-height: 1.7; 
-                border: 2px solid #1e3a8a; background: #fefefe;}
-    body.pc-view .hint{font-size:14px; margin:12px 0; line-height: 1.5; color: #6b7280; text-align: center;}
-    body.pc-view ol#preview{font-size:15px; margin:16px 0; padding-left:24px; line-height: 1.6; 
-               background: #f0f9ff; padding: 16px; border-radius: 10px; border-left: 3px solid #1e3a8a;}
-    body.pc-view .actions button{padding:14px; font-size:15px; min-height: 52px; border-radius: 12px; font-weight: 700;}
-    body.pc-view .status{font-size:14px; margin-top:12px; padding: 8px 0; text-align: center;}
-    body.pc-view .toolbar-inner{padding:16px; border-radius:12px;}
+    /* PC表示時のスタイル - 文字サイズのみ調整、ボタンサイズは維持 */
+    /* body.pc-view クラスで制御（JavaScriptでデバイスタイプを検出） */
+    body.pc-view .wrap{max-width: 720px; margin: 0 auto;}
+    body.pc-view header{font-size:20px;}
+    body.pc-view .btn-lg{font-size:20px;}
+    body.pc-view .btn-ghost{font-size:16px;}
+    body.pc-view .guide-title{font-size:18px;}
+    body.pc-view .guide-item{font-size:16px;}
+    body.pc-view textarea#output{font-size:16px;}
+    body.pc-view .hint{font-size:16px;}
+    body.pc-view ol#preview{font-size:16px;}
+    body.pc-view .actions button{font-size:18px;}
+    body.pc-view .status{font-size:16px;}
 
     /* ── ガイド（カテゴリ） ───────────────────────── */
     .section{border:1px dashed var(--border); border-radius:12px; padding:10px; margin:10px 0;}

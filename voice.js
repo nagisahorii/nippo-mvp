@@ -470,16 +470,18 @@
               return;
             }
             try {
+              lastProcessedResultIndex = 0; // 再起動時はインデックスをリセット
               sr.start();
-              console.log("✅ 音声認識を再起動しました");
+              console.log("✅ 音声認識を再起動しました（インデックスをリセット）");
             } catch (e) {
               console.error("❌ 音声認識の再起動に失敗:", e);
               // 再起動に失敗した場合、もう一度試す
               setTimeout(() => {
                 if (!on) return;
                 try {
+                  lastProcessedResultIndex = 0; // 再起動時はインデックスをリセット
                   sr.start();
-                  console.log("✅ 音声認識を再起動しました（2回目）");
+                  console.log("✅ 音声認識を再起動しました（2回目、インデックスをリセット）");
                 } catch (e2) {
                   console.error("❌ 音声認識の再起動に失敗（2回目）:", e2);
                   on = false;

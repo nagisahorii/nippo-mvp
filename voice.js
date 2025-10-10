@@ -420,42 +420,67 @@
       
       sr.onresult = (e) => {
         console.log("音声認識結果:", e);
-        const results = Array.from(e.results);
-        const latest = results[results.length - 1];
-        console.log("最新の結果:", latest);
-        console.log("isFinal:", latest.isFinal);
-        const transcript = latest[0].transcript;
-        console.log("transcript:", transcript);
-        console.log("transcript.trim():", transcript.trim());
+        console.log("resultIndex:", e.resultIndex, "results.length:", e.results.length);
         
-        if (latest.isFinal) {
-          const trimmed = transcript.trim();
-          if (trimmed) { // 空文字列をフィルタリング
-            buffer.push(trimmed);
-            console.log("bufferに追加:", trimmed);
-            console.log("現在のbuffer:", buffer);
-            if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+        // resultIndexから最後まで、すべての確定結果を処理
+        // これにより、再起動時にもデータが失われない
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const result = e.results[i];
+          console.log(`結果[${i}]:`, result, "isFinal:", result.isFinal);
+          
+          if (result.isFinal) {
+            const transcript = result[0].transcript;
+            console.log("transcript:", transcript);
+            const trimmed = transcript.trim();
+            
+            if (trimmed) {
+              buffer.push(trimmed);
+              console.log("bufferに追加:", trimmed);
+              console.log("現在のbuffer:", buffer);
+              if (prv) prv.innerHTML += `<li>${trimmed}</li>`;
+            } else {
+              console.log("⚠️ 空のテキストのためスキップ");
+            }
           } else {
-            console.log("⚠️ 空のテキストのためスキップ");
+            // 暫定結果もログ出力（デバッグ用）
+            console.log("暫定結果:", result[0].transcript);
           }
         }
       };
       
       sr.onend = () => {
         console.log("sr.onend 発火, on:", on);
+        console.log("現在のbuffer:", buffer);
+        
         // ユーザーが明示的に停止していない場合は再起動
         if (on) {
           console.log("⚠️ 音声認識が予期せず終了したため再起動します");
-          try {
-            sr.start();
-            console.log("音声認識を再起動しました");
-          } catch (e) {
-            console.error("音声認識の再起動に失敗:", e);
-            // 再起動に失敗した場合のみ停止
-            on = false;
-            if (recBtn) recBtn.textContent = "🎙️ 録音開始";
-            setStatus("音声認識が停止しました。もう一度お試しください。", "err");
-          }
+          // iPhoneでは即座に再起動するとエラーになることがあるため、少し待つ
+          setTimeout(() => {
+            if (!on) {
+              console.log("再起動前にユーザーが停止したためキャンセル");
+              return;
+            }
+            try {
+              sr.start();
+              console.log("✅ 音声認識を再起動しました");
+            } catch (e) {
+              console.error("❌ 音声認識の再起動に失敗:", e);
+              // 再起動に失敗した場合、もう一度試す
+              setTimeout(() => {
+                if (!on) return;
+                try {
+                  sr.start();
+                  console.log("✅ 音声認識を再起動しました（2回目）");
+                } catch (e2) {
+                  console.error("❌ 音声認識の再起動に失敗（2回目）:", e2);
+                  on = false;
+                  if (recBtn) recBtn.textContent = "🎙️ 録音開始";
+                  setStatus("音声認識が停止しました。もう一度お試しください。", "err");
+                }
+              }, 300);
+            }
+          }, 100);
         }
       };
       
